@@ -1,17 +1,20 @@
-#include <iostream>
+#include "tbb/task_scheduler_init.h"
 #include "tbb/tick_count.h"
+#include <iostream>
 
 
 using namespace std;
 using namespace tbb;
 
 
-int main( int argc, char *argv[] ) {
+int main() {
   tick_count start, finish;
 
   start = tick_count::now();
+  task_scheduler_init init;
 
   cout << "Hello, TBB" << endl;
+  init.terminate();
 
   finish = tick_count::now();
 
