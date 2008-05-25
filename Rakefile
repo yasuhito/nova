@@ -6,8 +6,8 @@ FileList[ '*.cpp' ].each do | each |
 
   CLEAN << executable
 
-  rule executable => [ proc do | task_name | each end ] do | t |
-    sh "g++ -Wall -Wextra #{ t.source } -o #{ t.name } -ltbb"
+  file executable => [ each ] do | t |
+    sh "g++ -Wall -Wextra #{ each } -o #{ executable } -ltbb"
   end
 end
 
