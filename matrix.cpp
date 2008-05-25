@@ -29,10 +29,6 @@ public:
 
 
   void operator()( const blocked_range2d< size_t > &range ) const {
-    double ( *aa )[ L ] = a;
-    double ( *bb )[ N ] = b;
-    double ( *cc )[ N ] = c;
-
     for ( size_t i = range.rows().begin() ; i != range.rows().end(); i++ ) {
       for ( size_t j = range.cols().begin() ; j != range.cols().end() ; j++ ) {
         double total = 0;
@@ -43,6 +39,8 @@ public:
       }
     }
   }
+
+
   MatricMult( double aa[ M ][ L ], double bb[ L ][ N ], double cc[ M ][ N ] )
   : a( aa ), b( bb ), c( cc ) {}
 };
