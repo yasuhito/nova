@@ -47,4 +47,5 @@ code_change(_OldVsn, N, _Extra) -> {ok, N}.
 
 
 get_cpu_load() ->
-    100.
+    cpu_sup:avg1().
+

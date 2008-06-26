@@ -24,7 +24,7 @@ handle_event(Event, N) ->
 
 handle_call(_Request, N) ->
     Reply = N,
-     {ok, N, N}.
+    {ok, N, N}.
 
 
 handle_info(_Info, N) ->
