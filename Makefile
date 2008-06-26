@@ -8,7 +8,8 @@
 
 ERL = erl -boot start_sasl -config nova_test
 
-MODS = cpu_monitor_app cpu_monitor_supervisor cpu_monitor_server cpu_alarm_handler
+MODS = cpu_monitor_app cpu_monitor_supervisor cpu_monitor_server cpu_alarm_handler \
+	plain_server hostname_server
 
 all: compile
 
