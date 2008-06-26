@@ -1,5 +1,5 @@
--module(cpu_load_supervisor).
--behaviour(supervisor).         % see erl -man supervisor
+-module(cpu_monitor_supervisor).
+-behaviour(supervisor).
 
 
 -export([start/0, start_in_shell_for_testing/0, start_link/1, init/1]).
@@ -26,7 +26,7 @@ init([]) ->
                            {alarm_handler, swap},
                            {my_alarm_handler, xyz}),
     {ok, {{one_for_one, 3, 10},
-          [{tag1,
+          [{cpu_monitor_server,
             {cpu_monitor_server, start_link, []},
             permanent,
             10000,

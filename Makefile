@@ -6,17 +6,14 @@
 .yrl.erl:
 	erlc -W $<
 
-ERL = erl -boot start_clean
+ERL = erl -boot start_sasl -config nova_test
 
-# コンパイルしたい Erlang モジュールのリストをここに書く
-
-MODS = cpu_monitor_supervisor
+MODS = cpu_monitor_app cpu_monitor_supervisor cpu_monitor_server cpu_alarm_handler
 
 all: compile
 
 compile: ${MODS:%=%.beam} subdirs
 
-# アプリの実行
 application1: compile
 	${ERL} -pa Dir1 -s application1 start Arg1 Arg2
 

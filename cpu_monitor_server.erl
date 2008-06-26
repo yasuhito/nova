@@ -48,4 +48,3 @@ code_change(_OldVsn, N, _Extra) -> {ok, N}.
 
 get_cpu_load() ->
     cpu_sup:avg1().
-
