@@ -18,7 +18,6 @@ rpc( Pid, Request ) ->
 loop( X ) ->
     receive
         { From, spawn } ->
-            io:format( "SPAWN~n" ),
             From ! { self(), lib_nova:spawn_all( "nova@hongo", 0, 10 ) },
             loop( X );
         { 'EXIT', SomePid, Reason } ->
