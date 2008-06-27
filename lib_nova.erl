@@ -17,7 +17,10 @@ seq_str( From, To ) ->
 
 
 ping_all( Name, From, To ) ->
-    lists:foreach( fun( X ) -> ping( X ) end, node_list( Name, From, To ) ).
+    lists:foreach( fun( X ) ->
+                           spawn( fun() -> ping( X ) end )
+                   end,
+                   node_list( Name, From, To ) ).
 
 
 ping( Node ) ->
