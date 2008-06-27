@@ -6,4 +6,6 @@
 
 
 ping() ->
-    net_adm:ping(nova@hongo000).
+    net_adm:ping(nova@hongo000),
+    net_adm:ping(nova@hongo001).
+
