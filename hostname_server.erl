@@ -2,7 +2,7 @@
 %% plain_server と合わせて使うつもりの物。
 %%
 %% 使用例:
-%% 
+%%
 %% 1> Pid = plain_server:start().
 %% <0.33.0>
 %% 2> Pid ! {become, fun hostname_server:loop/0}.
@@ -17,12 +17,12 @@
 
 loop() ->
     receive{From, hostname} ->
-	    From ! {self(), hostname()},
-	    loop();
-	   {become, Something} ->
-	    Something()
+            From ! {self(), hostname()},
+            loop();
+           {become, Something} ->
+            Something()
     end.
 
 
 hostname() ->
-    string:strip(os:cmd("hostname"), right, $\n).
+    inet:gethostname().
