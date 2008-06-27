@@ -2,7 +2,7 @@
 
 
 -module( lib_nova ).
--export( [ ping_all/3, node_list/3 ] ).
+-export( [ spawn_all/3, ping_all/3, node_list/3 ] ).
 
 
 node_list( Name, From, To ) ->
@@ -14,6 +14,13 @@ seq_str( From, To ) ->
     [ string:concat( "00", integer_to_list( X ) ) || X <- L, X < 10 ]
         ++ [ string:concat( "0", integer_to_list( X ) ) || X <- L, X >= 10, X < 100 ]
         ++ [ integer_to_list( X ) || X <- L, X >= 100, X < 1000 ].
+
+
+spawn_all( Name, From, To ) ->
+    lists:foreach( fun( X ) ->
+                           spawn( X, fun() -> plain_server:wait() end )
+                   end,
+                   node_list( Name, From, To ) ).
 
 
 ping_all( Name, From, To ) ->
