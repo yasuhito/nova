@@ -1,84 +1,25 @@
 %% commonly used routines.
 
 
--module(lib_nova).
--export([ping_all/0]).
+-module( lib_nova ).
+-export( [ ping_all/3, node_list/3 ] ).
 
 
-ping_all() ->
-    ping(nova@hongo000),
-    ping(nova@hongo001),
-    ping(nova@hongo002),
-    ping(nova@hongo003),
-    ping(nova@hongo004),
-    ping(nova@hongo005),
-    ping(nova@hongo006),
-    ping(nova@hongo007),
-    ping(nova@hongo008),
-    ping(nova@hongo009),
-    ping(nova@hongo010),
-    ping(nova@hongo011),
-    ping(nova@hongo012),
-    ping(nova@hongo013),
-    ping(nova@hongo014),
-    ping(nova@hongo015),
-    ping(nova@hongo016),
-    ping(nova@hongo017),
-    ping(nova@hongo018),
-    ping(nova@hongo019),
-    ping(nova@hongo020),
-    ping(nova@hongo021),
-    ping(nova@hongo022),
-    ping(nova@hongo023),
-    ping(nova@hongo024),
-    ping(nova@hongo025),
-    ping(nova@hongo026),
-    ping(nova@hongo027),
-    ping(nova@hongo028),
-    ping(nova@hongo029),
-    ping(nova@hongo030),
-    ping(nova@hongo031),
-    ping(nova@hongo032),
-    ping(nova@hongo033),
-    ping(nova@hongo034),
-    ping(nova@hongo035),
-    ping(nova@hongo036),
-    ping(nova@hongo037),
-    ping(nova@hongo038),
-    ping(nova@hongo039),
-    ping(nova@hongo040),
-    ping(nova@hongo041),
-    ping(nova@hongo042),
-    ping(nova@hongo043),
-    ping(nova@hongo044),
-    ping(nova@hongo045),
-    ping(nova@hongo046),
-    ping(nova@hongo047),
-    ping(nova@hongo048),
-    ping(nova@hongo049),
-    ping(nova@hongo050),
-    ping(nova@hongo051),
-    ping(nova@hongo052),
-    ping(nova@hongo053),
-    ping(nova@hongo054),
-    ping(nova@hongo055),
-    ping(nova@hongo056),
-    ping(nova@hongo057),
-    ping(nova@hongo058),
-    ping(nova@hongo059),
-    ping(nova@hongo060),
-    ping(nova@hongo061),
-    ping(nova@hongo062),
-    ping(nova@hongo063),
-    ping(nova@hongo064),
-    ping(nova@hongo065),
-    ping(nova@hongo066),
-    ping(nova@hongo067),
-    ping(nova@hongo068),
-    ping(nova@hongo069),
-    ping(nova@hongo070).
+node_list( Name, From, To ) ->
+    [ list_to_atom( string:concat( Name, X ) ) || X <- seq_str( From, To ) ].
 
 
-ping(Node) ->
-    io:format("~p~n", [Node]),
-    net_adm:ping(Node).
+seq_str( From, To ) ->
+    L = lists:seq( From, To ),
+    [ string:concat( "00", integer_to_list( X ) ) || X <- L, X < 10 ]
+        ++ [ string:concat( "0", integer_to_list( X ) ) || X <- L, X >= 10, X < 100 ]
+        ++ [ integer_to_list( X ) || X <- L, X >= 100, X < 1000 ].
+
+
+ping_all( Name, From, To ) ->
+    lists:foreach( fun( X ) -> ping( X ) end, node_list( Name, From, To ) ).
+
+
+ping( Node ) ->
+    io:format( "~p~n", [ Node ] ),
+    net_adm:ping( Node ).
