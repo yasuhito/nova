@@ -18,7 +18,7 @@ seq_str( From, To ) ->
 
 spawn_all( Name, From, To ) ->
     lists:foreach( fun( X ) ->
-                           spawn( X, fun() -> plain_server:wait() end )
+                           spawn( X, fun() -> plain_server:start() end )
                    end,
                    node_list( Name, From, To ) ).
 
