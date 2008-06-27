@@ -17,9 +17,10 @@ seq_str( From, To ) ->
 
 
 spawn_all( Name, From, To ) ->
-    lists:foreach( fun( X ) ->
-                           io:format( "SPAWN_LINK: ~p~n", [ X ] ),
-                           spawn_link( X, fun hostname_server:loop/0 )
+    lists:foreach( fun( Node ) ->
+                           io:format( "SPAWN_LINK: ~p~n", [ Node ] ),
+			   monitor_node( Node, true ),
+                           spawn_link( Node, fun hostname_server:loop/0 )
                    end,
                    node_list( Name, From, To ) ).
 
