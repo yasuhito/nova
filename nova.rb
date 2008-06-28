@@ -1,4 +1,4 @@
-!/usr/bin/env ruby
+#!/usr/bin/env ruby
 
 
 $PROBLEM_ID = 'sample0'
