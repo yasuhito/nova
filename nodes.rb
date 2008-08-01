@@ -3,6 +3,9 @@ class Nodes
   # [TODO] use ganglia
   def self.list cluster_name
     { 
+      # DISABLED imade001
+      :imade => %w(imade000 imade002 imade003 imade004 imade005 imade006 imade007 imade008 imade009 imade010 imade011 imade012 imade013 imade014 imade015 imade016 imade017 imade018 imade019 imade020 imade021 imade022 imade023 imade024 imade025 imade026 imade027 imade028 imade029),
+
       # DISABLED chiba001, chiba007, chiba009, chiba013, chiba121, chiba126, chiba141
       :chiba => %w(chiba000 chiba002 chiba003 chiba004 chiba006 chiba008 chiba010 chiba011 chiba016 chiba017 chiba018 chiba019 chiba020 chiba021 chiba022 chiba023 chiba024 chiba025 chiba026 chiba027 chiba028 chiba029 chiba030 chiba031 chiba055 chiba064 chiba065 chiba066 chiba100 chiba101 chiba102 chiba103 chiba104 chiba105 chiba106 chiba107 chiba108 chiba109 chiba110 chiba111 chiba112 chiba113 chiba114 chiba115 chiba116 chiba117 chiba118 chiba119 chiba120 chiba122 chiba123 chiba124 chiba125 chiba127 chiba128 chiba129 chiba130 chiba131 chiba132 chiba133 chiba134 chiba135 chiba136 chiba137 chiba138 chiba139 chiba140 chiba142 chiba143 chiba144 chiba145 chiba146 chiba147 chiba148 chiba149 chiba150 chiba151 chiba152 chiba153 chiba154 chiba155 chiba156 chiba157),
 
