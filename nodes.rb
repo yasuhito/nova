@@ -1,6 +1,4 @@
 class Nodes
-  # [FIXME] use monitoring data to build node lists.
-  # [FIXME] some nodes have multi-CPUs !
   def self.list cluster_name
     { 
       :pad => %w(pad039 pad041 pad043 pad044 pad045 pad046 pad047 pad048 pad049 pad051 pad052 pad053 pad054 pad055 pad056 pad057 pad059 pad060 pad061 pad062 pad064 pad065 pad066 pad067 pad068 pad069 pad071 pad073 pad074 pad075 pad076 pad078 pad079 pad080 pad081 pad082 pad083 pad084 pad086 pad087 pad088 pad091 pad093 pad094 pad095 pad098 pad099 pad100 pad106 pad108 pad111 pad113 pad114 pad119 pad124 pad125 pad126 pad129 pad130 pad131 pad039 pad041 pad043 pad044 pad045 pad046 pad047 pad048 pad049 pad051 pad052 pad053 pad054 pad055 pad056 pad057 pad059 pad060 pad061 pad062 pad064 pad065 pad066 pad067 pad068 pad069 pad071 pad073 pad074 pad075 pad076 pad078 pad079 pad080 pad081 pad082 pad083 pad084 pad086 pad087 pad088 pad091 pad093 pad094 pad095 pad098 pad099 pad100 pad106 pad108 pad111 pad113 pad114 pad119 pad124 pad125 pad126 pad129 pad130 pad131 pad039 pad041 pad043 pad044 pad045 pad046 pad047 pad048 pad049 pad051 pad052 pad053 pad054 pad055 pad056 pad057 pad059 pad060 pad061 pad062 pad064 pad065 pad066 pad067 pad068 pad069 pad071 pad073 pad074 pad075 pad076 pad078 pad079 pad080 pad081 pad082 pad083 pad084 pad086 pad087 pad088 pad091 pad093 pad094 pad095 pad098 pad099 pad100 pad106 pad108 pad111 pad113 pad114 pad119 pad124 pad125 pad126 pad129 pad130 pad131 pad039 pad041 pad043 pad044 pad045 pad046 pad047 pad048 pad049 pad051 pad052 pad053 pad054 pad055 pad056 pad057 pad059 pad060 pad061 pad062 pad064 pad065 pad066 pad067 pad068 pad069 pad071 pad073 pad074 pad075 pad076 pad078 pad079 pad080 pad081 pad082 pad083 pad084 pad086 pad087 pad088 pad091 pad093 pad094 pad095 pad098 pad099 pad100 pad106 pad108 pad111 pad113 pad114 pad119 pad124 pad125 pad126 pad129 pad130 pad131),
@@ -18,8 +16,9 @@ class Nodes
 
       :keio => %w(keio000 keio000 keio000 keio000 keio000 keio000 keio000 keio000 keio001 keio001 keio001 keio001 keio001 keio001 keio001 keio001 keio002 keio002 keio002 keio002 keio002 keio002 keio002 keio002 keio003 keio003 keio003 keio003 keio003 keio003 keio003 keio003 keio004 keio004 keio004 keio004 keio004 keio004 keio004 keio004 keio005 keio005 keio005 keio005 keio005 keio005 keio005 keio005 keio006 keio006 keio006 keio006 keio006 keio006 keio006 keio006 keio007 keio007 keio007 keio007 keio007 keio007 keio007 keio007 keio008 keio008 keio008 keio008 keio008 keio008 keio008 keio008 keio009 keio009 keio009 keio009 keio009 keio009 keio009 keio009 keio010 keio010 keio010 keio010 keio010 keio010 keio010 keio010),
 
-      # DISABLED imade001
-      :imade => %w(imade000 imade002 imade003 imade004 imade005 imade006 imade007 imade008 imade009 imade010 imade011 imade012 imade013 imade014 imade015 imade016 imade017 imade018 imade019 imade020 imade021 imade022 imade023 imade024 imade025 imade026 imade027 imade028 imade029),
+      :imade => [ 'imade000', 'imade001', 'imade002', 'imade003', 'imade004', 'imade005', 'imade006', 'imade007', 'imade008', 'imade009',
+                  'imade010', 'imade011', 'imade012', 'imade013', 'imade014', 'imade015', 'imade016', 'imade017', 'imade018', 'imade019',
+                  'imade020', 'imade021', 'imade022', 'imade023', 'imade024', 'imade025', 'imade026', 'imade027', 'imade028', 'imade029' ],
 
       :chiba => [ 'chiba000', 'chiba001', 'chiba002', 'chiba003', 'chiba004', 'chiba005', 'chiba006', 'chiba007', 'chiba008', 'chiba009',
                   'chiba010', 'chiba011', 'chiba012', 'chiba013', 'chiba014', 'chiba015', 'chiba016', 'chiba017', 'chiba018', 'chiba019',
