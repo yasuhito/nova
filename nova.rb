@@ -1,57 +1,114 @@
 #!/usr/bin/env ruby
 
 
-$PROBLEM_ID = 'sample0'
-$DACH_API = '/home/dach911/dach_api/dach_api'
+require 'dach_api'
+require 'jobs'
+require 'nodes'
+require 'thread_pool'
 
 
-def get_problem
-  get_problem_out = `#{ $DACH_API } --get_problem #{ $PROBLEM_ID }`.chomp
-  raise "Parse Error! dach_api --get_problem" unless /\A(\S+) (\S+)\Z/=~ get_problem_out
-  $TRIAL_ID = $1
-  $FITS_DIR = File.join( '/home/dach911', $2 )
-end
+class Nova
+  def initialize
+    @dach_api = DachAPI.new
+    @pool = ThreadPool.new
+    @in_progress = 0
+    @completed = 0
 
-
-def fits_files
-  Dir.glob File.join( $FITS_DIR, "*.fits" )
-end
-
-
-def fits
-  fits = {}
-  fits_files.each do | each |
-    fname = File.basename( each )
-    raise "Parse Error! *.fits file name" unless /\Ar(\d\d\d_\d\d)_t[01]\.fits\Z/=~ fname
-    fits[ $1 ] ? fits[ $1 ] << each : fits[ $1 ] = [ each ] 
+    cleanup
   end
-  fits
-end
 
 
-def superfind
-  fits.each_pair do | key, value |
-    result = "/home/dach000/result/#{ key }.result"
-    cmd = "/home/dach/finder/dach.sh #{ value.sort[ 0 ] } #{ value.sort[ 1 ] } > #{ result }"
-    puts cmd
-    system "time " + cmd
+  def start problem_id
+    @dach_api.get_problem problem_id
+
+    $stderr.puts "Problem ID: #{ problem_id }"
+    $stderr.puts "  Trial ID: #{ @dach_api.trial_id }"
+    $stderr.puts "  Fits DIR: #{ @dach_api.fits_dir }"
+    $stderr.puts
+
+    dispatch
+    @pool.shutdown
+
+    $stderr.puts 
+    concat_results
+
+    $stderr.puts
+    $stderr.puts "Check Answer:"
+    @dach_api.check_ans result
+  end
+
+
+  ################################################################################
+  private
+  ################################################################################
+
+
+  def cleanup
+    results.each do | each |
+      FileUtils.rm each
+    end
+  end
+
+
+  def concat_results
+    $stderr.puts "Result (#{ cluster_name } cluster): #{ result }"
+    system "cat #{ results.join( ' ' ) } > #{ result }"
+  end
+
+
+  def result
+    File.join @dach_api.result_dir, "#{ cluster_name }.result"
+  end
+
+
+  def results
+    Dir.glob File.join( @dach_api.result_dir, '*.result' )
+  end
+
+
+  def cluster_name
+    /\A([a-zA-Z]+)\d+/=~ `hostname`
+    $1
+  end
+
+
+  def dispatch
+    jobs.each do | each |
+      @pool.dispatch do | node |
+        @in_progress += 1
+        $stderr.puts "#{ status }: Job #{ each.name } started on #{ node }."
+
+        # [FIXME] use GXP ??
+        cmd = "ssh #{ node } #{ each.to_cmd } > #{ job_result( each ) }"
+        $stderr.puts cmd if $DEBUG
+        system cmd
+
+        @in_progress -= 1; @completed += 1
+        $stderr.puts "#{ status }: Job #{ each.name } on #{ node } completed."
+      end
+    end
+  end
+
+
+  def job_result job
+    File.join @dach_api.result_dir, "#{ job.name }.result"
+  end
+
+
+  def jobs
+    Jobs.list @dach_api.fits_dir
+  end
+
+
+  def status
+    dig = jobs.size.to_s.length
+    sprintf "[%2d in progress/%#{ dig }d completed/%#{ dig }d total]", @in_progress, @completed, jobs.size
   end
 end
 
 
-def check_ans
-  Dir.glob( "/home/dach000/result/*.result" ).each do | each |
-    get_problem # BUG??
-    cmd = "#{ $DACH_API } --check_ans #{ $TRIAL_ID } #{ each }"
-    system cmd
-    puts cmd
-  end
-end
-
-
-get_problem
-superfind
-check_ans
+raise "Usage: nova.rb problem_id" if ARGV.size != 1
+Nova.new.start ARGV[ 0 ]
 
 
 ### Local variables:
