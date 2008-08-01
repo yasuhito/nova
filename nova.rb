@@ -11,6 +11,7 @@ class Nova
   def initialize
     @dach_api = DachAPI.new
     @pool = ThreadPool.new( cluster_name.to_sym )
+
     @in_progress = 0
     @completed = 0
 
@@ -20,13 +21,14 @@ class Nova
 
   def start problem_id
     @dach_api.get_problem problem_id
-
     $stderr.puts "Problem ID: #{ problem_id }"
     $stderr.puts "  Trial ID: #{ @dach_api.trial_id }"
     $stderr.puts "  Fits DIR: #{ @dach_api.fits_dir }"
     $stderr.puts
 
-    $stderr.puts "Available nodes (#{ @pool.nodes.uniq.size } nodes): #{ @pool.nodes.uniq.join( ', ' ) }"
+    @pool.update
+
+    print_nodes
     $stderr.puts
 
     dispatch
@@ -44,6 +46,11 @@ class Nova
   ################################################################################
   private
   ################################################################################
+
+
+  def print_nodes
+    $stderr.puts "Available nodes (#{ @pool.nodes.size } nodes, #{ @pool.cpus.size } CPUs): #{ @pool.nodes.join( ', ' ) }"
+  end
 
 
   def cleanup
@@ -79,15 +86,15 @@ class Nova
     jobs.each do | each |
       @pool.dispatch do | node |
         @in_progress += 1
-        $stderr.puts "#{ status }: Job #{ each.name } started on #{ node }."
+        $stderr.puts "#{ status }: Job #{ each.name } started on #{ node.name }."
 
         # [FIXME] use GXP ??
-        cmd = "ssh #{ node } #{ each.to_cmd } > #{ job_result( each ) }"
+        cmd = "ssh #{ node.name } #{ each.to_cmd } > #{ job_result( each ) }"
         $stderr.puts cmd if $DEBUG
         system cmd
 
         @in_progress -= 1; @completed += 1
-        $stderr.puts "#{ status }: Job #{ each.name } on #{ node } completed."
+        $stderr.puts "#{ status }: Job #{ each.name } on #{ node.name } completed."
       end
     end
   end

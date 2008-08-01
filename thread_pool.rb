@@ -1,16 +1,28 @@
+require 'dacha'
 require 'thread'
 
 
 class ThreadPool
+  attr_reader :cpus
   attr_reader :nodes
 
 
   def initialize cluster_name
     @pool = []
-    @nodes = Nodes.list( cluster_name )
-    @max_size = @nodes.size
+    @dacha = Dacha.new( cluster_name )
     @pool_mutex = Mutex.new
     @pool_cv = ConditionVariable.new
+  end
+
+
+  def update
+    @cpus = @dacha.list.sort_by do | each |
+      each.load_avg
+    end
+    @nodes = @cpus.collect do | each |
+      each.name
+    end.uniq
+    @max_size = @cpus.size
   end
 
 
@@ -26,7 +38,7 @@ class ThreadPool
       end
 
       # [???]
-      node = @nodes.pop
+      node = @cpus.shift
       @pool << { :node => node, :thread => Thread.current }
       begin
         yield node, *args
@@ -37,7 +49,7 @@ class ThreadPool
           # Remove the thread from the pool.
           @pool.delete( { :node => node, :thread => Thread.current } )
           # Enable node
-          @nodes.unshift node
+          @cpus.push node
           # Signal the next waiting thread that there's a space in the pool.
           @pool_cv.signal
         end
