@@ -10,7 +10,8 @@ class Nodes
 
       :kyoto => %w(kyoto000 kyoto002 kyoto003 kyoto004 kyoto005 kyoto006 kyoto007 kyoto008 kyoto009 kyoto010 kyoto011 kyoto012 kyoto013 kyoto014 kyoto018 kyoto019 kyoto022 kyoto023 kyoto024 kyoto025 kyoto026 kyoto027 kyoto028 kyoto029 kyoto030 kyoto031 kyoto032 kyoto033 kyoto034 kyoto000 kyoto002 kyoto003 kyoto004 kyoto005 kyoto006 kyoto007 kyoto008 kyoto009 kyoto010 kyoto011 kyoto012 kyoto013 kyoto014 kyoto018 kyoto019 kyoto022 kyoto023 kyoto024 kyoto025 kyoto026 kyoto027 kyoto028 kyoto029 kyoto030 kyoto031 kyoto032 kyoto033 kyoto034),
 
-      :kobe => %w(kobe000 kobe000 kobe000 kobe000 kobe000 kobe000 kobe000 kobe000 kobe001 kobe001 kobe001 kobe001 kobe001 kobe001 kobe001 kobe001 kobe002 kobe002 kobe002 kobe002 kobe002 kobe002 kobe002 kobe002 kobe003 kobe003 kobe003 kobe003 kobe003 kobe003 kobe003 kobe003 kobe004 kobe004 kobe004 kobe004 kobe004 kobe004 kobe004 kobe004 kobe005 kobe005 kobe005 kobe005 kobe005 kobe005 kobe005 kobe005 kobe006 kobe006 kobe006 kobe006 kobe006 kobe006 kobe006 kobe006 kobe007 kobe007 kobe007 kobe007 kobe007 kobe007 kobe007 kobe007 kobe008 kobe008 kobe008 kobe008 kobe008 kobe008 kobe008 kobe008 kobe009 kobe009 kobe009 kobe009 kobe009 kobe009 kobe009 kobe009 kobe010 kobe010 kobe010 kobe010 kobe010 kobe010 kobe010 kobe010),
+      :kobe => [ 'kobe000', 'kobe001', 'kobe002', 'kobe003', 'kobe004', 'kobe005', 'kobe006', 'kobe007', 'kobe008', 'kobe009',
+                 'kobe010' ],
 
       :suzuk => [ 'suzuk000', 'suzuk001', 'suzuk002', 'suzuk003', 'suzuk004', 'suzuk005', 'suzuk006', 'suzuk007', 'suzuk008', 'suzuk009',
                   'suzuk010', 'suzuk011', 'suzuk012', 'suzuk013', 'suzuk014', 'suzuk015', 'suzuk016', 'suzuk017', 'suzuk018', 'suzuk019',
