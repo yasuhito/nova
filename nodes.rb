@@ -1,8 +1,10 @@
 class Nodes
-  # [TODO] SMP
-  # [TODO] use ganglia
+  # [FIXME] use monitoring data to build node lists.
+  # [FIXME] some nodes have multi-CPUs !
   def self.list cluster_name
     { 
+      :keio => %w(keio000 keio000 keio000 keio000 keio000 keio000 keio000 keio000 keio001 keio001 keio001 keio001 keio001 keio001 keio001 keio001 keio002 keio002 keio002 keio002 keio002 keio002 keio002 keio002 keio003 keio003 keio003 keio003 keio003 keio003 keio003 keio003 keio004 keio004 keio004 keio004 keio004 keio004 keio004 keio004 keio005 keio005 keio005 keio005 keio005 keio005 keio005 keio005 keio006 keio006 keio006 keio006 keio006 keio006 keio006 keio006 keio007 keio007 keio007 keio007 keio007 keio007 keio007 keio007 keio008 keio008 keio008 keio008 keio008 keio008 keio008 keio008 keio009 keio009 keio009 keio009 keio009 keio009 keio009 keio009 keio010 keio010 keio010 keio010 keio010 keio010 keio010 keio010),
+
       # DISABLED imade001
       :imade => %w(imade000 imade002 imade003 imade004 imade005 imade006 imade007 imade008 imade009 imade010 imade011 imade012 imade013 imade014 imade015 imade016 imade017 imade018 imade019 imade020 imade021 imade022 imade023 imade024 imade025 imade026 imade027 imade028 imade029),
 
