@@ -2,6 +2,9 @@ require 'thread'
 
 
 class ThreadPool
+  attr_reader :nodes
+
+
   def initialize cluster_name
     @pool = []
     @nodes = Nodes.list( cluster_name )

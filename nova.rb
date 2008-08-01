@@ -26,6 +26,9 @@ class Nova
     $stderr.puts "  Fits DIR: #{ @dach_api.fits_dir }"
     $stderr.puts
 
+    $stderr.puts "Available nodes (#{ @pool.nodes.uniq.size } nodes): #{ @pool.nodes.uniq.join( ', ' ) }"
+    $stderr.puts
+
     dispatch
     @pool.shutdown
 
