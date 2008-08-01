@@ -26,7 +26,8 @@ class Nodes
 
       :mirai => %w(mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005),
 
-      :okubo => %w(okubo000 okubo000 okubo001 okubo001 okubo002 okubo002 okubo003 okubo003 okubo004 okubo004 okubo005 okubo005 okubo006 okubo006 okubo007 okubo007 okubo008 okubo008 okubo009 okubo009 okubo010 okubo010 okubo012 okubo012 okubo013 okubo013),
+      :okubo => [ 'okubo000', 'okubo001', 'okubo002', 'okubo003', 'okubo004', 'okubo005', 'okubo006', 'okubo007', 'okubo008', 'okubo009',
+                  'okubo010', 'okubo011', 'okubo012', 'okubo013' ],
 
       :hongo => [ 'hongo000', 'hongo001', 'hongo002', 'hongo003', 'hongo004', 'hongo005', 'hongo006', 'hongo007', 'hongo008', 'hongo009',
                   'hongo010', 'hongo011', 'hongo012', 'hongo013', 'hongo014', 'hongo015', 'hongo016', 'hongo017', 'hongo018', 'hongo019',
