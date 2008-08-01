@@ -3,7 +3,7 @@ class Nodes
   # [TODO] use ganglia
   def self.list cluster_name
     { 
-      :mirai => %(mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005),
+      :mirai => %w(mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005),
 
       :okubo => %w(okubo000 okubo000 okubo001 okubo001 okubo002 okubo002 okubo003 okubo003 okubo004 okubo004 okubo005 okubo005 okubo006 okubo006 okubo007 okubo007 okubo008 okubo008 okubo009 okubo009 okubo010 okubo010 okubo012 okubo012 okubo013 okubo013),
 
