@@ -1,7 +1,17 @@
 class Nodes
   def self.list cluster_name
     { 
-      :pad => %w(pad039 pad041 pad043 pad044 pad045 pad046 pad047 pad048 pad049 pad051 pad052 pad053 pad054 pad055 pad056 pad057 pad059 pad060 pad061 pad062 pad064 pad065 pad066 pad067 pad068 pad069 pad071 pad073 pad074 pad075 pad076 pad078 pad079 pad080 pad081 pad082 pad083 pad084 pad086 pad087 pad088 pad091 pad093 pad094 pad095 pad098 pad099 pad100 pad106 pad108 pad111 pad113 pad114 pad119 pad124 pad125 pad126 pad129 pad130 pad131 pad039 pad041 pad043 pad044 pad045 pad046 pad047 pad048 pad049 pad051 pad052 pad053 pad054 pad055 pad056 pad057 pad059 pad060 pad061 pad062 pad064 pad065 pad066 pad067 pad068 pad069 pad071 pad073 pad074 pad075 pad076 pad078 pad079 pad080 pad081 pad082 pad083 pad084 pad086 pad087 pad088 pad091 pad093 pad094 pad095 pad098 pad099 pad100 pad106 pad108 pad111 pad113 pad114 pad119 pad124 pad125 pad126 pad129 pad130 pad131 pad039 pad041 pad043 pad044 pad045 pad046 pad047 pad048 pad049 pad051 pad052 pad053 pad054 pad055 pad056 pad057 pad059 pad060 pad061 pad062 pad064 pad065 pad066 pad067 pad068 pad069 pad071 pad073 pad074 pad075 pad076 pad078 pad079 pad080 pad081 pad082 pad083 pad084 pad086 pad087 pad088 pad091 pad093 pad094 pad095 pad098 pad099 pad100 pad106 pad108 pad111 pad113 pad114 pad119 pad124 pad125 pad126 pad129 pad130 pad131 pad039 pad041 pad043 pad044 pad045 pad046 pad047 pad048 pad049 pad051 pad052 pad053 pad054 pad055 pad056 pad057 pad059 pad060 pad061 pad062 pad064 pad065 pad066 pad067 pad068 pad069 pad071 pad073 pad074 pad075 pad076 pad078 pad079 pad080 pad081 pad082 pad083 pad084 pad086 pad087 pad088 pad091 pad093 pad094 pad095 pad098 pad099 pad100 pad106 pad108 pad111 pad113 pad114 pad119 pad124 pad125 pad126 pad129 pad130 pad131),
+      :pad => [ 'pad039',
+                'pad040', 'pad041', 'pad042', 'pad043', 'pad044', 'pad045', 'pad046', 'pad047', 'pad048', 'pad049',
+                'pad050', 'pad051', 'pad052', 'pad053', 'pad054', 'pad055', 'pad056', 'pad057', 'pad058', 'pad059',
+                'pad060', 'pad061', 'pad062', 'pad063', 'pad064', 'pad065', 'pad066', 'pad067', 'pad068', 'pad069',
+                'pad070', 'pad071', 'pad072', 'pad073', 'pad074', 'pad075', 'pad076', 'pad077', 'pad078', 'pad079',
+                'pad080', 'pad081', 'pad082', 'pad083', 'pad084', 'pad085', 'pad086', 'pad087', 'pad088', 'pad089',
+                'pad090', 'pad091', 'pad092', 'pad093', 'pad094', 'pad095', 'pad096', 'pad097', 'pad098', 'pad099',
+                'pad100', 'pad101', 'pad102', 'pad103', 'pad104', 'pad105', 'pad106', 'pad107', 'pad108', 'pad109',
+                'pad110', 'pad111', 'pad112', 'pad113', 'pad114', 'pad115', 'pad116', 'pad117', 'pad118', 'pad119',
+                'pad120', 'pad121', 'pad122', 'pad123', 'pad124', 'pad125', 'pad126', 'pad127', 'pad128', 'pad129',
+                'pad130', 'pad131' ],
 
       :kyushu => [ 'kyushu000', 'kyushu001', 'kyushu002', 'kyushu003', 'kyushu004', 'kyushu005', 'kyushu006', 'kyushu007', 'kyushu008', 'kyushu009' ],
 
