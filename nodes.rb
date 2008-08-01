@@ -5,8 +5,8 @@ class Nodes
 
       :kyushu => %w(kyushu000 kyushu000 kyushu000 kyushu000 kyushu000 kyushu000 kyushu000 kyushu000 kyushu001 kyushu001 kyushu001 kyushu001 kyushu001 kyushu001 kyushu001 kyushu001 kyushu002 kyushu002 kyushu002 kyushu002 kyushu002 kyushu002 kyushu002 kyushu002 kyushu003 kyushu003 kyushu003 kyushu003 kyushu003 kyushu003 kyushu003 kyushu003 kyushu004 kyushu004 kyushu004 kyushu004 kyushu004 kyushu004 kyushu004 kyushu004 kyushu005 kyushu005 kyushu005 kyushu005 kyushu005 kyushu005 kyushu005 kyushu005 kyushu006 kyushu006 kyushu006 kyushu006 kyushu006 kyushu006 kyushu006 kyushu006 kyushu007 kyushu007 kyushu007 kyushu007 kyushu007 kyushu007 kyushu007 kyushu007 kyushu008 kyushu008 kyushu008 kyushu008 kyushu008 kyushu008 kyushu008 kyushu008 kyushu009 kyushu009 kyushu009 kyushu009 kyushu009 kyushu009 kyushu009 kyushu009),
 
-      # DISABLED 003, 004, 006, 007, 008, 009
-      :hiro => %w(hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010),
+      :hiro => [ 'hiro000', 'hiro001', 'hiro002', 'hiro003', 'hiro004', 'hiro005', 'hiro006', 'hiro007', 'hiro008', 'hiro009',
+                 'hiro010' ],
 
       :kyoto => [ 'kyoto000', 'kyoto001', 'kyoto002', 'kyoto003', 'kyoto004', 'kyoto005', 'kyoto006', 'kyoto007', 'kyoto008', 'kyoto009',
                   'kyoto010', 'kyoto011', 'kyoto012', 'kyoto013', 'kyoto014', 'kyoto015', 'kyoto016', 'kyoto017', 'kyoto018', 'kyoto019',
