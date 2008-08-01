@@ -24,7 +24,7 @@ class Nodes
       # DISABLED chiba001, chiba007, chiba009, chiba013, chiba121, chiba126, chiba141
       :chiba => %w(chiba000 chiba002 chiba003 chiba004 chiba006 chiba008 chiba010 chiba011 chiba016 chiba017 chiba018 chiba019 chiba020 chiba021 chiba022 chiba023 chiba024 chiba025 chiba026 chiba027 chiba028 chiba029 chiba030 chiba031 chiba055 chiba064 chiba065 chiba066 chiba100 chiba101 chiba102 chiba103 chiba104 chiba105 chiba106 chiba107 chiba108 chiba109 chiba110 chiba111 chiba112 chiba113 chiba114 chiba115 chiba116 chiba117 chiba118 chiba119 chiba120 chiba122 chiba123 chiba124 chiba125 chiba127 chiba128 chiba129 chiba130 chiba131 chiba132 chiba133 chiba134 chiba135 chiba136 chiba137 chiba138 chiba139 chiba140 chiba142 chiba143 chiba144 chiba145 chiba146 chiba147 chiba148 chiba149 chiba150 chiba151 chiba152 chiba153 chiba154 chiba155 chiba156 chiba157),
 
-      :mirai => %w(mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai000 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai001 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai002 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai003 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai004 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005 mirai005),
+      :mirai => [ 'mirai000', 'mirai001', 'mirai002', 'mirai003', 'mirai004', 'mirai005' ],
 
       :okubo => [ 'okubo000', 'okubo001', 'okubo002', 'okubo003', 'okubo004', 'okubo005', 'okubo006', 'okubo007', 'okubo008', 'okubo009',
                   'okubo010', 'okubo011', 'okubo012', 'okubo013' ],
