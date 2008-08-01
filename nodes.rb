@@ -8,7 +8,10 @@ class Nodes
       # DISABLED 003, 004, 006, 007, 008, 009
       :hiro => %w(hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010 hiro000 hiro001 hiro002 hiro005 hiro010),
 
-      :kyoto => %w(kyoto000 kyoto002 kyoto003 kyoto004 kyoto005 kyoto006 kyoto007 kyoto008 kyoto009 kyoto010 kyoto011 kyoto012 kyoto013 kyoto014 kyoto018 kyoto019 kyoto022 kyoto023 kyoto024 kyoto025 kyoto026 kyoto027 kyoto028 kyoto029 kyoto030 kyoto031 kyoto032 kyoto033 kyoto034 kyoto000 kyoto002 kyoto003 kyoto004 kyoto005 kyoto006 kyoto007 kyoto008 kyoto009 kyoto010 kyoto011 kyoto012 kyoto013 kyoto014 kyoto018 kyoto019 kyoto022 kyoto023 kyoto024 kyoto025 kyoto026 kyoto027 kyoto028 kyoto029 kyoto030 kyoto031 kyoto032 kyoto033 kyoto034),
+      :kyoto => [ 'kyoto000', 'kyoto001', 'kyoto002', 'kyoto003', 'kyoto004', 'kyoto005', 'kyoto006', 'kyoto007', 'kyoto008', 'kyoto009',
+                  'kyoto010', 'kyoto011', 'kyoto012', 'kyoto013', 'kyoto014', 'kyoto015', 'kyoto016', 'kyoto017', 'kyoto018', 'kyoto019',
+                  'kyoto020', 'kyoto021', 'kyoto022', 'kyoto023', 'kyoto024', 'kyoto025', 'kyoto026', 'kyoto027', 'kyoto028', 'kyoto029',
+                  'kyoto030', 'kyoto031', 'kyoto032', 'kyoto033', 'kyoto034' ],
 
       :kobe => [ 'kobe000', 'kobe001', 'kobe002', 'kobe003', 'kobe004', 'kobe005', 'kobe006', 'kobe007', 'kobe008', 'kobe009',
                  'kobe010' ],
