@@ -2,9 +2,9 @@ require 'thread'
 
 
 class ThreadPool
-  def initialize
+  def initialize cluster_name
     @pool = []
-    @nodes = Nodes.list
+    @nodes = Nodes.list( cluster_name )
     @max_size = @nodes.size
     @pool_mutex = Mutex.new
     @pool_cv = ConditionVariable.new

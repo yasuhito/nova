@@ -10,7 +10,7 @@ require 'thread_pool'
 class Nova
   def initialize
     @dach_api = DachAPI.new
-    @pool = ThreadPool.new
+    @pool = ThreadPool.new( cluster_name.to_sym )
     @in_progress = 0
     @completed = 0
 
