@@ -12,7 +12,10 @@ class Nodes
 
       :kobe => %w(kobe000 kobe000 kobe000 kobe000 kobe000 kobe000 kobe000 kobe000 kobe001 kobe001 kobe001 kobe001 kobe001 kobe001 kobe001 kobe001 kobe002 kobe002 kobe002 kobe002 kobe002 kobe002 kobe002 kobe002 kobe003 kobe003 kobe003 kobe003 kobe003 kobe003 kobe003 kobe003 kobe004 kobe004 kobe004 kobe004 kobe004 kobe004 kobe004 kobe004 kobe005 kobe005 kobe005 kobe005 kobe005 kobe005 kobe005 kobe005 kobe006 kobe006 kobe006 kobe006 kobe006 kobe006 kobe006 kobe006 kobe007 kobe007 kobe007 kobe007 kobe007 kobe007 kobe007 kobe007 kobe008 kobe008 kobe008 kobe008 kobe008 kobe008 kobe008 kobe008 kobe009 kobe009 kobe009 kobe009 kobe009 kobe009 kobe009 kobe009 kobe010 kobe010 kobe010 kobe010 kobe010 kobe010 kobe010 kobe010),
 
-      :suzuk => %w(suzuk000 suzuk001 suzuk002 suzuk003 suzuk004 suzuk005 suzuk006 suzuk007 suzuk008 suzuk009 suzuk010 suzuk011 suzuk012 suzuk013 suzuk014 suzuk015 suzuk016 suzuk017 suzuk018 suzuk019 suzuk020 suzuk021 suzuk022 suzuk023 suzuk024 suzuk025 suzuk026 suzuk027 suzuk028 suzuk029 suzuk030 suzuk031 suzuk032 suzuk033 suzuk034 suzuk035 suzuk000 suzuk001 suzuk002 suzuk003 suzuk004 suzuk005 suzuk006 suzuk007 suzuk008 suzuk009 suzuk010 suzuk011 suzuk012 suzuk013 suzuk014 suzuk015 suzuk016 suzuk017 suzuk018 suzuk019 suzuk020 suzuk021 suzuk022 suzuk023 suzuk024 suzuk025 suzuk026 suzuk027 suzuk028 suzuk029 suzuk030 suzuk031 suzuk032 suzuk033 suzuk034 suzuk035),
+      :suzuk => [ 'suzuk000', 'suzuk001', 'suzuk002', 'suzuk003', 'suzuk004', 'suzuk005', 'suzuk006', 'suzuk007', 'suzuk008', 'suzuk009',
+                  'suzuk010', 'suzuk011', 'suzuk012', 'suzuk013', 'suzuk014', 'suzuk015', 'suzuk016', 'suzuk017', 'suzuk018', 'suzuk019',
+                  'suzuk020', 'suzuk021', 'suzuk022', 'suzuk023', 'suzuk024', 'suzuk025', 'suzuk026', 'suzuk027', 'suzuk028', 'suzuk029',
+                  'suzuk030', 'suzuk031', 'suzuk032', 'suzuk033', 'suzuk034', 'suzuk035' ],
 
       :keio => [ 'keio000', 'keio001', 'keio002', 'keio003', 'keio004', 'keio005', 'keio006', 'keio007', 'keio008', 'keio009',
                  'keio010' ],
