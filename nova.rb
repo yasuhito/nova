@@ -111,7 +111,7 @@ class Nova
         end
         stop = Time.now
 
-        File.open( job_result( each, ( stop - start ).to_i ), 'w' ) do | f |
+        File.open( result_path( each, ( stop - start ).to_i ), 'w' ) do | f |
           r.each do | l |
             f.puts l
           end
@@ -124,7 +124,7 @@ class Nova
   end
 
 
-  def job_result job, sec
+  def result_path job, sec
     File.join @dach_api.result_dir, "#{ job.name }.in#{ sec }s.result"
   end
 
