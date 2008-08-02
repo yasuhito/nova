@@ -42,6 +42,12 @@ class Dacha
 end
 
 
+if $0 == __FILE__
+  /\A([a-zA-Z]+)\d+/=~ `hostname`
+  Dacha.new( $1 ).list
+end
+
+
 ### Local variables:
 ### mode: Ruby
 ### coding: utf-8-unix
