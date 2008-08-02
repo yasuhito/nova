@@ -1,6 +1,6 @@
+require 'clusters'
 require 'cpu'
 require 'net/telnet'
-require 'nodes'
 
 
 class Dacha
@@ -15,7 +15,7 @@ class Dacha
     cpus = []
     timeout = []
     connerr = []
-    Nodes.list( @cluster_name ).collect do | each |
+    Clusters.list( @cluster_name )[ :list ].collect do | each |
       Thread.start do
         begin
           s = Net::Telnet.new( 'Host' => each, 'Port' => 3224, 'Timeout' => 1 )
