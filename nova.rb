@@ -3,7 +3,6 @@
 
 require 'dach_api'
 require 'jobs'
-require 'nodes'
 require 'thread_pool'
 
 
