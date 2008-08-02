@@ -13,6 +13,7 @@ CLUSTERS = [ :pad, :kyushu, :hiro, :kyoto, :kobe, :suzuk, :keio, :imade, :chiba,
 
 CLUSTERS.each do | each |
   c = Clusters.list( each )
+  # [TODO] if following scp failed, then try next node.
   sh "scp dach000@#{ c[ :list ].first }.#{ c[ :domain ] }:/home/dach000/result/#{ each }.result results"
 end
 
