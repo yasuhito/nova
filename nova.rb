@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 
 
+$LOAD_PATH.unshift File.dirname( __FILE__ )
+
+
 require 'dach_api'
 require 'jobs'
 require 'thread_pool'
