@@ -1,4 +1,10 @@
 class Clusters
+  def self.all
+    # [FIXME] Temporally disable okubo cluster.
+    [ :pad, :kyushu, :hiro, :kyoto, :kobe, :suzuk, :keio, :imade, :chiba, :mirai, :hongo ] # :okubo
+  end
+
+
   def self.list name
     { 
       :pad => { 
