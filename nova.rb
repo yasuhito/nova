@@ -89,7 +89,7 @@ class Nova
     jobs.each do | each |
       @pool.dispatch do | node |
         @in_progress += 1
-        $stderr.puts "#{ status }: Job #{ each.name } started on #{ node.name }."
+        $stderr.puts "#{ Time.now.to_s } #{ status }: Job #{ each.name } started on #{ node.name }."
 
         start = Time.now
         r = []
@@ -111,14 +111,16 @@ class Nova
         end
         stop = Time.now
 
-        File.open( result_path( each, ( stop - start ).to_i ), 'w' ) do | f |
+        time = ( stop - start ).to_i
+
+        File.open( result_path( each, time ), 'w' ) do | f |
           r.each do | l |
             f.puts l
           end
         end
 
         @in_progress -= 1; @completed += 1
-        $stderr.puts "#{ status }: Job #{ each.name } on #{ node.name } completed."
+        $stderr.puts "#{ Time.now.to_s } #{ status }: Job #{ each.name } on #{ node.name } completed in #{ time } seconds."
       end
     end
   end
