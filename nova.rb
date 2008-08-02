@@ -6,6 +6,7 @@ $LOAD_PATH.unshift File.dirname( __FILE__ )
 
 require 'dach_api'
 require 'jobs'
+require 'shell'
 require 'thread_pool'
 
 
@@ -90,10 +91,31 @@ class Nova
         @in_progress += 1
         $stderr.puts "#{ status }: Job #{ each.name } started on #{ node.name }."
 
-        # [FIXME] use GXP ??
-        cmd = "ssh #{ node.name } #{ each.to_cmd } > #{ job_result( each ) }"
-        $stderr.puts cmd if $DEBUG
-        system cmd
+        start = Time.now
+        r = []
+        Popen3::Shell.open do | shell |
+          shell.on_stdout do | line |
+            r << line
+          end
+          shell.on_stderr do | line |
+            @stderr << line
+            $stderr.puts line
+          end
+          shell.on_failure do
+            raise %{Command "#{ command }" failed.\n#{ @stderr.join( "\n" )}}
+          end
+          
+          cmd = "ssh #{ node.name } #{ each.to_cmd }"
+          $stderr.puts cmd if $DEBUG
+          shell.exec cmd
+        end
+        stop = Time.now
+
+        File.open( job_result( each, ( stop - start ).to_i ), 'w' ) do | f |
+          r.each do | l |
+            f.puts l
+          end
+        end
 
         @in_progress -= 1; @completed += 1
         $stderr.puts "#{ status }: Job #{ each.name } on #{ node.name } completed."
@@ -102,8 +124,8 @@ class Nova
   end
 
 
-  def job_result job
-    File.join @dach_api.result_dir, "#{ job.name }.result"
+  def job_result job, sec
+    File.join @dach_api.result_dir, "#{ job.name }.in#{ sec }s.result"
   end
 
 
