@@ -44,7 +44,10 @@ end
 
 if $0 == __FILE__
   /\A([a-zA-Z]+)\d+/=~ `hostname`
-  Dacha.new( $1 ).list
+  nodes = Dacha.new( $1.to_sym ).list.collect do | each |
+    each.name
+  end.uniq
+  $stderr.puts "Available nodes (#{ nodes.size } nodes): #{ nodes.join( ', ' ) }"
 end
 
 
