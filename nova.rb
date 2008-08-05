@@ -85,11 +85,14 @@ class Nova
   end
 
 
+  # [XXX] RETRY if failed to dispatch
   def dispatch
     jobs.each do | each |
       @pool.dispatch do | node |
         @in_progress += 1
         $stderr.puts "#{ Time.now.to_s } #{ status }: Job #{ each.name } started on #{ node.name }."
+
+        cmd = "ssh #{ node.name } #{ each.to_cmd }"
 
         start = Time.now
         r = []
@@ -98,14 +101,12 @@ class Nova
             r << line
           end
           shell.on_stderr do | line |
-            @stderr << line
             $stderr.puts line
           end
           shell.on_failure do
-            raise %{Command "#{ command }" failed.\n#{ @stderr.join( "\n" )}}
+            raise %{Command "#{ cmd }" failed.}
           end
           
-          cmd = "ssh #{ node.name } #{ each.to_cmd }"
           $stderr.puts cmd if $DEBUG
           shell.exec cmd
         end

@@ -37,9 +37,8 @@ class ThreadPool
         end
       end
 
-      # [???]
       node = @cpus.shift
-      @pool << { :node => node, :thread => Thread.current }
+      @pool << Thread.current
       begin
         yield node, *args
       rescue => e
@@ -47,7 +46,7 @@ class ThreadPool
       ensure
         @pool_mutex.synchronize do
           # Remove the thread from the pool.
-          @pool.delete( { :node => node, :thread => Thread.current } )
+          @pool.delete Thread.current
           # Enable node
           @cpus.push node
           # Signal the next waiting thread that there's a space in the pool.
