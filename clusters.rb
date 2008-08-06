@@ -75,13 +75,13 @@ class Clusters
                    'chiba030', 'chiba031', 'chiba032', 'chiba033', 'chiba034', 'chiba035', 'chiba036', 'chiba037', 'chiba038', 'chiba039',
                    'chiba040', 'chiba041', 'chiba042', 'chiba043', 'chiba044', 'chiba045', 'chiba046', 'chiba047', 'chiba048', 'chiba049',
                    'chiba050', 'chiba051', 'chiba052', 'chiba053', 'chiba054', 'chiba055', 'chiba056', 'chiba057', 'chiba058', 'chiba059',
-                   'chiba060', 'chiba061', 'chiba062', 'chiba063', 'chiba064', 'chiba065', 'chiba066', 'chiba067', 'chiba068', 'chiba069' ]
-#                    'chiba100', 'chiba101', 'chiba102', 'chiba103', 'chiba104', 'chiba105', 'chiba106', 'chiba107', 'chiba108', 'chiba109',
-#                    'chiba110', 'chiba111', 'chiba112', 'chiba113', 'chiba114', 'chiba115', 'chiba116', 'chiba117', 'chiba118', 'chiba119',
-#                    'chiba120', 'chiba121', 'chiba122', 'chiba123', 'chiba124', 'chiba125', 'chiba126', 'chiba127', 'chiba128', 'chiba129',
-#                    'chiba130', 'chiba131', 'chiba132', 'chiba133', 'chiba134', 'chiba135', 'chiba136', 'chiba137', 'chiba138', 'chiba139',
-#                    'chiba140', 'chiba141', 'chiba142', 'chiba143', 'chiba144', 'chiba145', 'chiba146', 'chiba147', 'chiba148', 'chiba149',
-#                    'chiba150', 'chiba151', 'chiba152', 'chiba153', 'chiba154', 'chiba155', 'chiba156', 'chiba157' ]
+                   'chiba060', 'chiba061', 'chiba062', 'chiba063', 'chiba064', 'chiba065', 'chiba066', 'chiba067', 'chiba068', 'chiba069',
+                   'chiba100', 'chiba101', 'chiba102', 'chiba103', 'chiba104', 'chiba105', 'chiba106', 'chiba107', 'chiba108', 'chiba109',
+                   'chiba110', 'chiba111', 'chiba112', 'chiba113', 'chiba114', 'chiba115', 'chiba116', 'chiba117', 'chiba118', 'chiba119',
+                   'chiba120', 'chiba121', 'chiba122', 'chiba123', 'chiba124', 'chiba125', 'chiba126', 'chiba127', 'chiba128', 'chiba129',
+                   'chiba130', 'chiba131', 'chiba132', 'chiba133', 'chiba134', 'chiba135', 'chiba136', 'chiba137', 'chiba138', 'chiba139',
+                   'chiba140', 'chiba141', 'chiba142', 'chiba143', 'chiba144', 'chiba145', 'chiba146', 'chiba147', 'chiba148', 'chiba149',
+                   'chiba150', 'chiba151', 'chiba152', 'chiba153', 'chiba154', 'chiba155', 'chiba156', 'chiba157' ]
       },
 
       :mirai => {

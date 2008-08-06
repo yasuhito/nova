@@ -39,10 +39,6 @@ class Nova
 
     $stderr.puts 
     concat_results
-
-    $stderr.puts
-    $stderr.puts "Check Answer:"
-    @dach_api.check_ans result
   end
 
 
