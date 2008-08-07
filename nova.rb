@@ -77,7 +77,6 @@ class Nova
   end
 
 
-  # [XXX] RETRY if failed to dispatch
   def dispatch
     jobs.each do | each |
       @pool.dispatch( each.name ) do | node |
