@@ -88,7 +88,8 @@ class Nova
         @in_progress += 1
         $stderr.puts "#{ Time.now.to_s } #{ status }: Job #{ each.name } started on #{ node.name }."
 
-        cmd = "ssh #{ node.name } #{ each.to_cmd }"
+        # cmd = "ssh #{ node.name } #{ each.to_cmd }"
+        cmd = "ssh #{ node.name } sleep 10"
 
         start = Time.now
         r = []
