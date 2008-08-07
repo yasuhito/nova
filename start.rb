@@ -62,7 +62,9 @@ if ARGV.size == 1
   $stderr.puts "Checking answer..."
   sh "ssh dach000@hongo000.logos.ic.i.u-tokyo.ac.jp /home/dach911/dach_api/dach_api --check_ans #{ $TRIAL_ID } /home/dach000/nova/all.result"
 elsif ARGV.size == 2
-  run Clusters.list( ARGV[ 0 ].to_sym ) , ARGV[ 1 ]
+  cluster_name = ARGV[ 0 ]
+  run Clusters.list( cluster_name.to_sym ) , ARGV[ 1 ]
+  sh "ruby collect.rb #{ cluster_name }"
 else
   $stderr.puts <<-MSG
 Usage:
