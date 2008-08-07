@@ -18,6 +18,13 @@ class Checkpoint
       end
     end
   end
+
+
+  def self.load value
+    if value == :trial_id
+      File.read( File.join( DIR, 'trial_id' ) ).chomp
+    end
+  end
 end
 
 

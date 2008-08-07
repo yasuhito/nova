@@ -40,7 +40,7 @@ if ARGV.size == 0
   end
   concat files
 elsif ARGV.size == 1
-  collect ARGV[ 0 ].to_sym
+  concat [ collect( ARGV[ 0 ].to_sym ) ]
 else
   $stderr.puts <<-MSG
 Usage:
