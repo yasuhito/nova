@@ -1,4 +1,11 @@
 #!/usr/bin/ruby -w
+#
+# Deploy dach programs to cluster nodes.
+#
+# Usage:
+#   ruby deploy.rb
+#   ruby deploy.rb CLUSTER_NAME
+#
 
 
 require 'rubygems'
@@ -19,6 +26,13 @@ if ARGV.size == 0
   end
 elsif ARGV.size == 1
   scp ARGV[ 0 ].to_sym
+else
+  $stderr.puts <<-MSG
+Usage:
+  ruby deploy.rb
+  ruby deploy.rb CLUSTER_NAME
+MSG
+  exit 1
 end
 
 
