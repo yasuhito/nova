@@ -6,6 +6,7 @@ $LOAD_PATH.unshift File.dirname( __FILE__ )
 
 require 'dach_api'
 require 'jobs'
+require 'log'
 require 'shell'
 require 'thread_pool'
 
@@ -13,11 +14,6 @@ require 'thread_pool'
 class Nova
   def initialize
     @dach_api = DachAPI.new
-    @pool = ThreadPool.new( cluster_name.to_sym )
-
-    @in_progress = 0
-    @completed = 0
-
     cleanup
   end
 
@@ -29,6 +25,7 @@ class Nova
     $stderr.puts "  Fits DIR: #{ @dach_api.fits_dir }"
     $stderr.puts
 
+    @pool = ThreadPool.new( cluster_name.to_sym, jobs.size )
     @pool.update
 
     print_nodes
@@ -37,7 +34,6 @@ class Nova
     dispatch
     @pool.shutdown
 
-    $stderr.puts 
     concat_results
   end
 
@@ -60,7 +56,7 @@ class Nova
 
 
   def concat_results
-    $stderr.puts "Result (#{ cluster_name } cluster): #{ result }"
+    puts "#{ Log.green( 'FINISHED' ) } (#{ cluster_name } cluster)"
     system "cat #{ results.join( ' ' ) } > #{ result }"
   end
 
@@ -84,15 +80,12 @@ class Nova
   # [XXX] RETRY if failed to dispatch
   def dispatch
     jobs.each do | each |
-      @pool.dispatch do | node |
-        @in_progress += 1
-        $stderr.puts "#{ Time.now.to_s } #{ status }: Job #{ each.name } started on #{ node.name }."
-
+      @pool.dispatch( each.name ) do | node |
         # cmd = "ssh #{ node.name } #{ each.to_cmd }"
-        cmd = "ssh #{ node.name } sleep 10"
+        cmd = "ssh #{ node.name } sleep 20"
 
-        start = Time.now
         r = []
+        start = Time.now
         Popen3::Shell.open do | shell |
           shell.on_stdout do | line |
             r << line
@@ -106,19 +99,13 @@ class Nova
           
           $stderr.puts cmd if $DEBUG
           shell.exec cmd
-        end
-        stop = Time.now
 
-        time = ( stop - start ).to_i
-
-        File.open( result_path( each, time ), 'w' ) do | f |
-          r.each do | l |
-            f.puts l
+          File.open( result_path( each, ( Time.now - start ).to_i ), 'w' ) do | f |
+            r.each do | l |
+              f.puts l
+            end
           end
         end
-
-        @in_progress -= 1; @completed += 1
-        $stderr.puts "#{ Time.now.to_s } #{ status }: Job #{ each.name } on #{ node.name } completed in #{ time } seconds."
       end
     end
   end
@@ -131,12 +118,6 @@ class Nova
 
   def jobs
     Jobs.list @dach_api.fits_dir
-  end
-
-
-  def status
-    dig = jobs.size.to_s.length
-    sprintf "[%2d in progress/%#{ dig }d completed/%#{ dig }d total]", @in_progress, @completed, jobs.size
   end
 end
 

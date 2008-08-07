@@ -8,18 +8,23 @@ class Log
   RESET = "[0m"
 
 
+  def self.pink str
+    PINK + str + RESET
+  end
+
+
   def self.orange str
-    ORANGE + str +  RESET
+    ORANGE + str + RESET
   end
 
 
   def self.slate str
-    SLATE + str +  RESET
+    SLATE + str + RESET
   end
 
 
   def self.green str
-    GREEN + str +  RESET
+    GREEN + str + RESET
   end
 end
 
