@@ -1,3 +1,9 @@
+#!/usr/bin/env ruby
+
+
+$LOAD_PATH.unshift File.dirname( __FILE__ )
+
+
 require 'clusters'
 require 'cpu'
 require 'net/telnet'
@@ -47,7 +53,8 @@ if $0 == __FILE__
   nodes = Dacha.new( $1.to_sym ).list.collect do | each |
     each.name
   end.uniq
-  $stderr.puts "Available nodes (#{ nodes.size } nodes): #{ nodes.join( ', ' ) }"
+  ratio = nodes.size.to_f / Clusters.list( $1.to_sym )[ :list ].size * 100
+  $stderr.puts "Available nodes (#{ nodes.size } nodes, #{ ratio.to_i } %): #{ nodes.join( ', ' ) }"
 end
 
 
