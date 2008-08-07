@@ -15,7 +15,6 @@ include Daemonize
 
 fork do
   daemonize
-  log = Tempfile.new( 'dachmon.log' )
 
   socket = TCPServer.open( 3224 )
   loop do
@@ -29,3 +28,9 @@ end
 
 sleep 10
 
+
+### Local variables:
+### mode: Ruby
+### coding: utf-8-unix
+### indent-tabs-mode: nil
+### End:
