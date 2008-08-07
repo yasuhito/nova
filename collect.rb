@@ -1,4 +1,11 @@
 #!/usr/bin/ruby -w
+#
+# Collect dach job results from cluster(s).
+#
+# Usage:
+#   ruby collect.rb
+#   ruby collect.rb CLUSTER_NAME
+#
 
 
 require 'rubygems'
@@ -35,7 +42,11 @@ if ARGV.size == 0
 elsif ARGV.size == 1
   collect ARGV[ 0 ].to_sym
 else
-  $stderr.puts "collect.rb [CLUSTER NAME]"
+  $stderr.puts <<-MSG
+Usage:
+  ruby collect.rb
+  ruby collect.rb CLUSTER_NAME
+MSG
   exit 1
 end
 
