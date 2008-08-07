@@ -1,4 +1,11 @@
 #!/usr/bin/ruby -w
+#
+# Start dach jobs on cluster(s).
+#
+# Usage:
+#   ruby start.rb
+#   ruby start.rb CLUSTER_NAME
+#
 
 
 $LOAD_PATH.unshift File.dirname( __FILE__ )
@@ -6,6 +13,7 @@ $LOAD_PATH.unshift File.dirname( __FILE__ )
 
 require 'rubygems'
 
+require 'checkpoint'
 require 'clusters'
 require 'rake'
 require 'shell'
@@ -24,6 +32,7 @@ def run cluster, problem
     shell.on_stderr do | line |
       if /hongo/=~ cluster[ :list ].first and /Trial ID: (\S*)/=~ line
         $TRIAL_ID = $1
+        Checkpoint.save :trial_id => $TRIAL_ID
       end
       $stderr.puts line
     end
@@ -53,9 +62,13 @@ if ARGV.size == 1
   $stderr.puts "Checking answer..."
   sh "ssh dach000@hongo000.logos.ic.i.u-tokyo.ac.jp /home/dach911/dach_api/dach_api --check_ans #{ $TRIAL_ID } /home/dach000/nova/all.result"
 elsif ARGV.size == 2
-  run Clusters.list( ARGV[ 0 ].to_sym) , ARGV[ 1 ]
+  run Clusters.list( ARGV[ 0 ].to_sym ) , ARGV[ 1 ]
 else
-  $stderr.puts "start.rb [CLUSTER NAME]"
+  $stderr.puts <<-MSG
+Usage:
+  ruby start.rb
+  ruby start.rb CLUSTER_NAME
+MSG
   exit 1
 end
 
