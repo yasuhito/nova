@@ -37,6 +37,8 @@ class Novad
             get_problem s, $1
           when /dispatch (.*) (.*)/
             dispatch s, $1, $2
+          when /quit/
+            exit 0
           else
             log "ERROR: unknown command #{ command }"
           end

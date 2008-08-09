@@ -1,0 +1,31 @@
+#!/usr/bin/ruby -w
+# -*- coding: utf-8 -*-
+
+
+$LOAD_PATH.unshift File.dirname( __FILE__ )
+
+
+require 'rubygems'
+
+require 'rake'
+
+
+begin
+  Thread.start do
+    sh "ssh dach000@hongo000.logos.ic.i.u-tokyo.ac.jp ruby /home/dach000/nova/novad.rb"
+  end
+
+  # [FIXME] novad が生きてるか？っていうのをちゃんと調べる
+  sleep 5
+
+  sh "ssh dach000@hongo000.logos.ic.i.u-tokyo.ac.jp ruby /home/dach000/nova/get_problem.rb sample0"
+ensure
+  sh "ssh dach000@hongo000.logos.ic.i.u-tokyo.ac.jp ruby /home/dach000/nova/quit.rb"
+end
+
+
+### Local variables:
+### mode: Ruby
+### coding: utf-8-unix
+### indent-tabs-mode: nil
+### End:
