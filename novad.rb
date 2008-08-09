@@ -7,6 +7,7 @@ $LOAD_PATH.unshift File.dirname( __FILE__ )
 
 require 'clusters'
 require 'dach_api'
+require 'job'
 require 'jobs'
 require 'shell'
 require 'socket'
@@ -20,23 +21,29 @@ class Novad
   end
 
 
-  # [TODO] ジョブのディスパッチコマンド (dispatch)
   # [TODO] ジョブの実行時間推定コマンド (guess)
   # [???] ほかに必要なコマンドは？？
   def start
     socket = TCPServer.open( 3225 )
+    socket.setsockopt( Socket::SOL_SOCKET, Socket::SO_REUSEADDR, 1 )
     loop do
       Thread.start( socket.accept ) do | s |
-        command = s.gets.chomp
-        case command
-        when /init/
-          init s
-        when /get_problem (.*)/
-          get_problem s, $1
-        else
-          log "ERROR: unknown command #{ command }"
+        begin
+          command = s.gets.chomp
+          case command
+          when /init/
+            init s
+          when /get_problem (.*)/
+            get_problem s, $1
+          when /dispatch (.*) (.*)/
+            dispatch s, $1, $2
+          else
+            log "ERROR: unknown command #{ command }"
+          end
+          s.close
+        rescue
+          log $!.to_s
         end
-        s.close
       end
     end
   end
@@ -74,6 +81,32 @@ class Novad
   end
 
 
+  def dispatch socket, host, fits
+    log "dispatch #{ host } #{ fits }"
+
+    job = Job.new( fits, @dach_api.fits_dir )
+    cmd = "ssh #{ host } #{ job.to_cmd }"
+
+    Popen3::Shell.open do | shell |
+      shell.on_stdout do | line |
+        socket.puts line
+      end
+      shell.on_stderr do | line |
+        log "WARN [#{ fits }]: #{ line }"
+      end
+      shell.on_success do
+        ok socket
+      end
+      shell.on_failure do
+        error socket, %{Command "#{ cmd }" failed.}
+      end
+
+      log "CMD: '#{ cmd }'"
+      shell.exec cmd
+    end
+  end
+
+
   def log str
     @log.puts "#{ Time.now }: #{ str }"
     @log.flush
@@ -82,7 +115,13 @@ class Novad
 
   def ok socket
     log 'OK'
-    socket.puts "OK"
+    socket.puts 'OK'
+  end
+
+
+  def error socket, msg
+    log "ERROR: #{ msg }"
+    socket.puts "ERROR: #{ msg }"
   end
 
 
@@ -119,9 +158,12 @@ class Novad
 
 
   # [???] ほかに pkill すべきプロセスは？？
+  # [???] pkill する順番は？
   def gxpc_killall
     command "gxpc e pkill detect3"
     command "gxpc e pkill match2"
+    command "gxpc e pkill mask3"
+    command "gxpc e pkill sex"
     command "gxpc e pkill imsub3vp3"
   end
 
