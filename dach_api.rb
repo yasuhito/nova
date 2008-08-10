@@ -28,8 +28,8 @@ class DachAPI
   end
 
 
-  def result_dir
-    '/home/dach000/result/'
+  def result_dir cluster_name
+    File.join '/home/yasuhito/project/nova/results', cluster_name
   end
 
 

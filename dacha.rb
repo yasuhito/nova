@@ -16,8 +16,6 @@ class Dacha
 
 
   def list
-    $stderr.puts "Getting a list of available CPUs..."
-
     cpus = []
     timeout = []
     connerr = []
@@ -40,8 +38,8 @@ class Dacha
     end.each do | each |
       each.join
     end
-    $stderr.puts "Timeout Error (#{ timeout.size } nodes): #{ timeout.sort.join( ' ' ) }" if timeout.size > 0
-    $stderr.puts "Connection Error (#{ connerr.size } nodes): #{ connerr.sort.join( ' ' ) }" if connerr.size > 0
+    # $stderr.puts "Timeout Error (#{ timeout.size } nodes): #{ timeout.sort.join( ' ' ) }" if timeout.size > 0
+    # $stderr.puts "Connection Error (#{ connerr.size } nodes): #{ connerr.sort.join( ' ' ) }" if connerr.size > 0
 
     cpus
   end

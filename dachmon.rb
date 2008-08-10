@@ -13,15 +13,13 @@ require 'tempfile'
 include Daemonize
 
 
-fork do
-  daemonize
+daemonize
 
-  socket = TCPServer.open( 3224 )
-  loop do
-    Thread.start( socket.accept ) do | ss |
-      ss.puts( ( [ Sys::CPU.load_avg[ 0 ] ] * Sys::CPU.processors.size ).join( ' ' ) )
-      ss.close
-    end
+socket = TCPServer.open( 3224 )
+loop do
+  Thread.start( socket.accept ) do | ss |
+    ss.puts( ( [ Sys::CPU.load_avg[ 0 ] ] * Sys::CPU.processors.size ).join( ' ' ) )
+    ss.close
   end
 end
 

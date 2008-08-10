@@ -1,4 +1,5 @@
 #!/usr/bin/ruby -w
+# -*- coding: utf-8 -*-
 #
 # Usage:
 #   ./dispatch.rb HOSTNAME FITS_ID
@@ -13,8 +14,11 @@ require 'socket'
 s = TCPSocket.open( 'localhost', 3225 )
 s.puts "dispatch #{ ARGV[ 0 ] } #{ ARGV[ 1 ] }"
 while l = s.gets
-  puts l
+  if l.chomp != 'OK'
+    puts l
+  end
 end
+# [TODO] エラー処理: OK か ERROR かで、終了ステータスをちゃんと変える
 
 
 ### Local variables:

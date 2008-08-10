@@ -1,12 +1,14 @@
 #!/usr/bin/ruby -w
+# -*- coding: utf-8 -*-
 
 
 require 'socket'
 
 
 s = TCPSocket.open( 'localhost', 3225 )
-s.puts 'init'
+s.puts 'get_nodes'
 puts s.gets
+# [TODO] エラー処理: OK か ERROR かで、終了ステータスをちゃんと変える
 
 
 ### Local variables:

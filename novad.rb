@@ -7,6 +7,8 @@ $LOAD_PATH.unshift File.dirname( __FILE__ )
 
 require 'clusters'
 require 'dach_api'
+require 'dacha'
+require 'daemonize'
 require 'job'
 require 'jobs'
 require 'shell'
@@ -17,27 +19,30 @@ require 'tempfile'
 class Novad
   def initialize
     @dach_api = DachAPI.new
+    @dacha = Dacha.new( cluster_name.to_sym )
     @log = Tempfile.new( 'novad' )
   end
 
 
   # [TODO] ジョブの実行時間推定コマンド (guess)
-  # [???] ほかに必要なコマンドは？？
+  # [???] ほかには？
   def start
-    socket = TCPServer.open( 3225 )
-    socket.setsockopt( Socket::SOL_SOCKET, Socket::SO_REUSEADDR, 1 )
+    log 'novad started.'
+    open_socket
+
     loop do
-      Thread.start( socket.accept ) do | s |
+      Thread.start( @socket.accept ) do | s |
         begin
           command = s.gets.chomp
           case command
-          when /init/
-            init s
           when /get_problem (.*)/
             get_problem s, $1
+          when /get_nodes/
+            get_nodes s
           when /dispatch (.*) (.*)/
             dispatch s, $1, $2
           when /quit/
+            @log.close true
             exit 0
           else
             log "ERROR: unknown command #{ command }"
@@ -45,6 +50,9 @@ class Novad
           s.close
         rescue
           log $!.to_s
+          $!.backtrace.each do | each |
+            log each
+          end
         end
       end
     end
@@ -56,10 +64,21 @@ class Novad
   ################################################################################
 
 
+  def open_socket
+    begin
+      @socket = TCPServer.open( 3225 ) 
+    rescue
+      log $!.to_s
+      $!.backtrace.each do | each |
+        log each
+      end
+    end
+  end
+
+
   def init socket
     log 'init'
 
-    cleanup_files
     gxpc_init
     gxpc_killall
     gxpc_dachmon
@@ -78,6 +97,22 @@ class Novad
     log "FITS DIR = #{ @dach_api.fits_dir }"
 
     socket.puts Jobs.list( @dach_api.fits_dir ).join( ' ' )
+
+    ok socket
+  end
+
+
+  def get_nodes socket
+    log "get_nodes #{ cluster_name }"
+
+    cpus = @dacha.list.sort_by do | each |
+      each.load_avg
+    end
+    nodes = cpus.collect do | each |
+      each.name
+    end.uniq
+
+    socket.puts nodes.join( ' ' )
 
     ok socket
   end
@@ -128,29 +163,22 @@ class Novad
 
 
   def command cmd
-    Popen3::Shell.open do | shell |
-      shell.on_stdout do | line |
-        log '  ' + line
-      end
-      shell.on_stderr do | line |
-        log '  ' + line
-      end
-      shell.on_failure do
-        raise %{Command "#{ cmd }" failed.}
-      end
+    log "CMD: '#{ cmd }'"
+    system cmd
+#     Popen3::Shell.open do | shell |
+#       shell.on_stdout do | line |
+#         log '  ' + line
+#       end
+#       shell.on_stderr do | line |
+#         log '  ' + line
+#       end
+#       shell.on_failure do
+#         raise %{Command "#{ cmd }" failed.}
+#       end
       
-      log "CMD: '#{ cmd }'"
-      shell.exec cmd
-    end
-  end
-
-
-  def gxpc_init
-    command "gxpc quit"
-    command "gxpc use ssh #{ cluster_name }"
-    first = Clusters.list( cluster_name.to_sym )[ :list ].first.tr( cluster_name, '' )
-    last = Clusters.list( cluster_name.to_sym )[ :list ].last.tr( cluster_name, '' )
-    command "gxpc explore #{ cluster_name }[[#{ first }-#{ last }]]"
+#       log "CMD: '#{ cmd }'"
+#       shell.exec cmd
+#     end
   end
 
 
@@ -175,28 +203,18 @@ class Novad
   end
 
 
-  def cleanup_files
-    results.each do | each |
-      log "rm #{ each }"
-      FileUtils.rm each
-    end
-  end
-
-
   def cluster_name
     /\A([a-zA-Z]+)\d+/=~ `hostname`
     $1
   end
-
-
-  def results
-    Dir.glob File.join( @dach_api.result_dir, '*.result' )
-  end
 end
 
 
-novad = Novad.new
-novad.start
+include Daemonize
+daemonize
+Novad.new.start
+
+sleep 10
 
 
 ### Local variables:

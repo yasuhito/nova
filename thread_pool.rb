@@ -1,33 +1,13 @@
-require 'dacha'
 require 'log'
 require 'thread'
 
 
 class ThreadPool
-  attr_reader :cpus
-  attr_reader :nodes
-
-
-  def initialize cluster_name, njobs
+  def initialize max_size
     @pool = []
-    @njobs = njobs
-    @dacha = Dacha.new( cluster_name )
+    @max_size = max_size
     @pool_mutex = Mutex.new
     @pool_cv = ConditionVariable.new
-
-    @in_progress = 0
-    @completed = 0
-  end
-
-
-  def update
-    @cpus = @dacha.list.sort_by do | each |
-      each.load_avg
-    end
-    @nodes = @cpus.collect do | each |
-      each.name
-    end.uniq
-    @max_size = @cpus.size
   end
 
 
@@ -40,36 +20,19 @@ class ThreadPool
           # Sleep until some other thread calls @pool_cv.signal.
           @pool_cv.wait @pool_mutex
         end
-        @in_progress += 1
       end
 
       begin
-        node = @cpus.shift
-        unless @pool.include?( Thread.current ) 
-          @pool << Thread.current
-        end
-
-        start = Time.now
-        puts "#{ Time.now.to_s } #{ status }: Job #{ job } started on #{ node.name }."
-        yield node
+        @pool << Thread.current
+        yield
       rescue => e
-        exception node.name, job, e
-        $stderr.puts Log.green( "Job #{ job } re-dispatching..." )
-        retry
+        exception job, e
       ensure
         @pool_mutex.synchronize do
           # Remove the thread from the pool.
           @pool.delete Thread.current
-          # Enable node
-          @cpus.push node
           # Signal the next waiting thread that there's a space in the pool.
           @pool_cv.signal
-          # update counters
-          @completed += 1
-          @in_progress -= 1
-
-          time = ( Time.now - start ).to_i
-          puts "#{ Time.now.to_s } #{ status }: Job #{ job } on #{ node.name } finished in #{ time } seconds."
         end
       end
     end
@@ -78,7 +41,9 @@ class ThreadPool
 
   def shutdown 
     @pool_mutex.synchronize do
-      @pool_cv.wait( @pool_mutex ) until @pool.empty?
+      until @pool.empty?
+        @pool_cv.wait @pool_mutex
+      end
     end
   end
 
@@ -88,13 +53,8 @@ class ThreadPool
   ################################################################################
   
 
-  def status
-    sprintf "[%2d in progress/%#{ @njobs.to_s.length }d completed/%#{ @njobs.to_s.length }d total]", @in_progress, @completed, @njobs
-  end
-
-
-  def exception node, job, exception
-    $stderr.puts Log.pink( "Job #{ job } on #{ node } failed: #{ exception }" )
+  def exception job, exception
+    $stderr.puts Log.pink( "Job #{ job } failed: #{ exception }" )
   end
 end
 
