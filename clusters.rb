@@ -69,14 +69,7 @@ class Clusters
 
       :chiba => { 
         :domain => 'intrigger.nii.ac.jp',
-        :list => [ 'chiba000', 'chiba001', 'chiba002', 'chiba003', 'chiba004', 'chiba005', 'chiba006', 'chiba007', 'chiba008', 'chiba009',
-                   'chiba010', 'chiba011', 'chiba012', 'chiba013', 'chiba014', 'chiba015', 'chiba016', 'chiba017', 'chiba018', 'chiba019',
-                   'chiba020', 'chiba021', 'chiba022', 'chiba023', 'chiba024', 'chiba025', 'chiba026', 'chiba027', 'chiba028', 'chiba029',
-                   'chiba030', 'chiba031', 'chiba032', 'chiba033', 'chiba034', 'chiba035', 'chiba036', 'chiba037', 'chiba038', 'chiba039',
-                   'chiba040', 'chiba041', 'chiba042', 'chiba043', 'chiba044', 'chiba045', 'chiba046', 'chiba047', 'chiba048', 'chiba049',
-                   'chiba050', 'chiba051', 'chiba052', 'chiba053', 'chiba054', 'chiba055', 'chiba056', 'chiba057', 'chiba058', 'chiba059',
-                   'chiba060', 'chiba061', 'chiba062', 'chiba063', 'chiba064', 'chiba065', 'chiba066', 'chiba067', 'chiba068', 'chiba069',
-                   'chiba100', 'chiba101', 'chiba102', 'chiba103', 'chiba104', 'chiba105', 'chiba106', 'chiba107', 'chiba108', 'chiba109',
+        :list => [ 'chiba100', 'chiba101', 'chiba102', 'chiba103', 'chiba104', 'chiba105', 'chiba106', 'chiba107', 'chiba108', 'chiba109',
                    'chiba110', 'chiba111', 'chiba112', 'chiba113', 'chiba114', 'chiba115', 'chiba116', 'chiba117', 'chiba118', 'chiba119',
                    'chiba120', 'chiba121', 'chiba122', 'chiba123', 'chiba124', 'chiba125', 'chiba126', 'chiba127', 'chiba128', 'chiba129',
                    'chiba130', 'chiba131', 'chiba132', 'chiba133', 'chiba134', 'chiba135', 'chiba136', 'chiba137', 'chiba138', 'chiba139',
@@ -97,14 +90,7 @@ class Clusters
 
       :hongo => { 
         :domain => 'logos.ic.i.u-tokyo.ac.jp',
-        :list => [ 'hongo000', 'hongo001', 'hongo002', 'hongo003', 'hongo004', 'hongo005', 'hongo006', 'hongo007', 'hongo008', 'hongo009',
-                   'hongo010', 'hongo011', 'hongo012', 'hongo013', 'hongo014', 'hongo015', 'hongo016', 'hongo017', 'hongo018', 'hongo019',
-                   'hongo020', 'hongo021', 'hongo022', 'hongo023', 'hongo024', 'hongo025', 'hongo026', 'hongo027', 'hongo028', 'hongo029',
-                   'hongo030', 'hongo031', 'hongo032', 'hongo033', 'hongo034', 'hongo035', 'hongo036', 'hongo037', 'hongo038', 'hongo039',
-                   'hongo040', 'hongo041', 'hongo042', 'hongo043', 'hongo044', 'hongo045', 'hongo046', 'hongo047', 'hongo048', 'hongo049',
-                   'hongo050', 'hongo051', 'hongo052', 'hongo053', 'hongo054', 'hongo055', 'hongo056', 'hongo057', 'hongo058', 'hongo059',
-                   'hongo060', 'hongo061', 'hongo062', 'hongo063', 'hongo064', 'hongo065', 'hongo066', 'hongo067', 'hongo068', 'hongo069',
-                   'hongo100', 'hongo101', 'hongo102', 'hongo103', 'hongo104', 'hongo105', 'hongo106', 'hongo107', 'hongo108', 'hongo109',
+        :list => [ 'hongo100', 'hongo101', 'hongo102', 'hongo103', 'hongo104', 'hongo105', 'hongo106', 'hongo107', 'hongo108', 'hongo109',
                    'hongo110', 'hongo111', 'hongo112', 'hongo113' ]
       }
     }[ name ]
