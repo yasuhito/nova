@@ -37,7 +37,19 @@ class ThreadPool
       end
     end
   end
-  
+
+ 
+  def synchronize
+    @pool_mutex.synchronize do
+      yield
+    end
+  end
+
+
+  def wait
+    @pool_cv.wait @pool_mutex
+  end
+
 
   def shutdown 
     @pool_mutex.synchronize do

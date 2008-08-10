@@ -182,27 +182,6 @@ class Novad
   end
 
 
-  def gxpc_quit
-    command "gxpc quit"
-  end
-
-
-  # [???] ほかに pkill すべきプロセスは？？
-  # [???] pkill する順番は？
-  def gxpc_killall
-    command "gxpc e pkill detect3"
-    command "gxpc e pkill match2"
-    command "gxpc e pkill mask3"
-    command "gxpc e pkill sex"
-    command "gxpc e pkill imsub3vp3"
-  end
-
-
-  def gxpc_dachmon
-    command 'gxpc e /home/dach000/nova/dachmon.rb'
-  end
-
-
   def cluster_name
     /\A([a-zA-Z]+)\d+/=~ `hostname`
     $1
