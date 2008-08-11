@@ -6,46 +6,8 @@ $LOAD_PATH.unshift File.dirname( __FILE__ )
 
 
 require 'run'
-require 'thread'
+require 'thread_pool'
 require 'tk'
-
-
-class Threads
-  def initialize
-    @threads = []
-    @mutex = Mutex.new
-    @cv = ConditionVariable.new
-  end
-
-
-  def dispatch cluster
-    Thread.new do
-      begin
-        @threads << Thread.current
-        yield cluster
-      rescue
-        $stderr.puts $!.to_str
-        $!.backtrace.each do | each |
-          $stderr.puts each
-        end
-      ensure
-        @mutex.synchronize do
-          @threads.delete Thread.current
-          @cv.signal
-        end
-      end
-    end
-  end
-
-
-  def shutdown
-    @mutex.synchronize do
-      until @threads.empty?
-        @cv.wait @mutex
-      end
-    end
-  end
-end
 
 
 class TextFrame < TkText
@@ -205,11 +167,11 @@ class DachGUI
 
 
   def do_parallel list, &block
-    threads = Threads.new
+    pool = ThreadPool.new
     list.each do | each |
-      threads.dispatch each, &block
+      pool.dispatch each, &block
     end
-    threads.shutdown
+    pool.shutdown
   end
 
 

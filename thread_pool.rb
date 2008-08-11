@@ -10,11 +10,11 @@ class ThreadPool
   end
 
 
-  def dispatch job
+  def dispatch *args
     Thread.new do
       begin
         @pool << Thread.current
-        yield
+        yield *args
       rescue => e
         exception job, e
       ensure
