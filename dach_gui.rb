@@ -104,13 +104,12 @@ class DachGUI
 
 
   def update cluster
-    jobs = 'Jobs: ' +  @run.job_all[ cluster ].join( ' ' )
-
+    jobs = 'Jobs: ' +  @run.job[ cluster ].join( ' ' )
     nodes = 'Nodes: ' + @run.node[ cluster ].collect do | each |
-      each.tr cluster, ''
+      each
     end.sort.join( ' ' )
 
-    disp_text cluster, jobs + "\n" + nodes
+    disp_text cluster, jobs + "\n\n" + nodes
   end
 
 
@@ -232,7 +231,7 @@ class DachGUI
         pack 'fill' => 'x'
       end
 
-      @f_text[ c ] = TextFrame.new( @root, 'height' => 10, 'width' => 65 ) {
+      @f_text[ c ] = TextFrame.new( @root, 'height' => 20, 'width' => 65 ) {
         bindtags bindtags - [ TkText ]
         configure 'takefocus', 0
       }.pack( 'expand' => true, 'fill' => 'x' )
@@ -255,36 +254,23 @@ class DachGUI
 
   def colorize cluster
     tag_error = TkTextTag.new( @f_text[ cluster ], 'foreground' => 'red' )
-    tag_done = TkTextTag.new( @f_text[ cluster ], 'foreground' => 'blue' )
-    tag_progress = TkTextTag.new( @f_text[ cluster ], 'foreground' => 'green' )
+    tag_done = TkTextTag.new( @f_text[ cluster ], 'background' => 'blue' )
+    tag_progress = TkTextTag.new( @f_text[ cluster ], 'background' => 'green' )
 
-    idx = '0.0'
     @run.job_inprogress[ cluster ].each do | each |
-      p each
-      if ( idx = @f_text[ cluster ].search( /#{ each }/, "#{ idx } + 1 char", 'end' ) ) != ''
-        @f_text[ cluster ].tag_add( tag_progress, idx, "#{ idx } + 1 char" )
-      end
+      idx = @f_text[ cluster ].search( %r|#{ each }|, '0.0', 'end' )
+      @f_text[ cluster ].tag_add( tag_progress, idx, "#{ idx } + #{ each.to_s.length } char" )
     end
 
-#     # 対象日の行への色付け
-#     # 文字列を検索して、テキストタグを割り当てています
-#     idx = @f_text.search(%r|^#{@f_param.get_target_day.tr('/','.')}|, '1.0')
-#     @f_text.tag_add(tag_TargetDay, idx, "#{idx} lineend") if idx
+    @run.node_inuse[ cluster ].each do | each |
+      idx = @f_text[ cluster ].search( %r|#{ each }|, '0.0', 'end' )
+      @f_text[ cluster ].tag_add( tag_progress, idx, "#{ idx } + #{ each.to_s.length } char" )
+    end
 
-#     # グラフ表示文字への色付け
-#     # 文字を検索して、テキストタグを割り当てています
-#     idx = '6.0'
-#     while (idx = @f_text.search(/P/, "#{idx} + 1 char", 'end')) != ''
-#       @f_text.tag_add(tag_P, idx, "#{idx} + 1 char")
-#     end
-#     idx = '6.0'
-#     while (idx = @f_text.search(/E/, "#{idx} + 1 char", 'end')) != ''
-#       @f_text.tag_add(tag_E, idx, "#{idx} + 1 char")
-#     end
-#     idx = '6.0'
-#     while (idx = @f_text.search(/M/, "#{idx} + 1 char", 'end')) != ''
-#       @f_text.tag_add(tag_M, idx, "#{idx} + 1 char")
-#     end
+    @run.job_done[ cluster ].each do | each |
+      idx = @f_text[ cluster ].search( %r|#{ each }|, '0.0', 'end' )
+      @f_text[ cluster ].tag_add( tag_done, idx, "#{ idx } + #{ each.to_s.length } char" )
+    end
   end
 end
 

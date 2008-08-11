@@ -16,9 +16,12 @@ require 'thread_pool'
 class Run
   attr_reader :clusters
   attr_reader :job
-  attr_reader :job_all
+  attr_reader :job_done
   attr_reader :job_inprogress
+  attr_reader :job_left
   attr_reader :node
+  attr_reader :node_inuse
+  attr_reader :node_left
   attr_reader :novad
 
 
@@ -27,9 +30,13 @@ class Run
     @clusters = clusters
 
     @job = Hash.new( [] )
-    @job_all = Hash.new( [] )
+    @job_left = Hash.new( [] )
     @job_inprogress = Hash.new( [] )
+    @job_done = Hash.new( [] )
+
     @node = Hash.new( [] )
+    @node_left = Hash.new( [] )
+    @node_inuse = Hash.new( [] )
     @novad = {}
 
     @pool = {}
@@ -78,7 +85,8 @@ class Run
     msg "Getting job list on #{ cluster }..."
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
-        @job[ cluster ] = @job_all[ cluster ] = line.split( ' ' )
+        @job[ cluster ] = line.split( ' ' )
+        @job_left[ cluster ] = @job[ cluster ].dup
       end
       shell.on_stderr do | line |
         $stderr.puts line
@@ -102,6 +110,7 @@ class Run
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
         @node[ cluster ] = line.split( ' ' )
+        @node_left[ cluster ] = @node[ cluster ].dup
       end
       shell.on_stderr do | line |
         $stderr.puts line
@@ -121,7 +130,7 @@ class Run
 
   def finished? cluster
     @pool[ cluster ].synchronize do
-      @job[ cluster ].empty? and @job_inprogress[ cluster ].empty?
+      @job_left[ cluster ].empty? and @job_inprogress[ cluster ].empty?
     end
   end
 
@@ -129,31 +138,20 @@ class Run
   def continue cluster
     node, job = nil
 
-    action = @pool[ cluster ].synchronize do
-      if ( not @node[ cluster ].empty? ) and ( not @job[ cluster ].empty? )
-        node = @node[ cluster ].pop
-        job = @job[ cluster ].pop
-        :dispatch
-      elsif @node[ cluster ].empty? and ( not @job[ cluster ].empty? )
-        :wait
-      else
-        :shutdown
+    @pool[ cluster ].synchronize do
+      if ( not @node_left[ cluster ].empty? ) and ( not @job_left[ cluster ].empty? )
+        node = @node_left[ cluster ].shift
+        @node_inuse[ cluster ] << node
+        job = @job_left[ cluster ].shift
       end
     end
 
-    msg action
-
-    case action
-    when :dispatch
+    if node and job
       @pool[ cluster ].dispatch( job ) do 
         dispatch cluster, node, job
       end
-    when :wait
-      @pool[ cluster ].wait
-    when :shutdown
-      @pool[ cluster ].shutdown
     else
-      raise "This shouldn't happen!"
+      @pool[ cluster ].wait
     end
   end
 
@@ -184,8 +182,11 @@ class Run
 
       shell.on_success do
         @pool[ cluster ].synchronize do
-          @node[ cluster ] << node
+          @node_left[ cluster ] << node
+          @node_inuse[ cluster ].delete node
+          @job_left[ cluster ].delete job
           @job_inprogress[ cluster ].delete job
+          @job_done[ cluster ] << job
         end
 
         time = ( Time.now - start ).to_i
