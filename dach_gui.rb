@@ -24,7 +24,10 @@ class Threads
         @threads << Thread.current
         yield cluster
       rescue
-        p $!
+        $stderr.puts $!.to_str
+        $!.backtrace.each do | each |
+          $stderr.puts each
+        end
       ensure
         @mutex.synchronize do
           @threads.delete Thread.current
@@ -100,6 +103,28 @@ class DachGUI
   ################################################################################
 
 
+  def update cluster
+    jobs = 'Jobs: ' +  @run.job_all[ cluster ].join( ' ' )
+
+    nodes = 'Nodes: ' + @run.node[ cluster ].collect do | each |
+      each.tr cluster, ''
+    end.sort.join( ' ' )
+
+    disp_text cluster, jobs + "\n" + nodes
+  end
+
+
+  def run
+    do_parallel( @run.clusters ) do | each |
+      until @run.finished?( each )
+        sleep 0.1 # sleep a little to avoid segfault (Tcl/Tk problem)
+        @run.continue each
+        update each
+      end
+    end
+  end
+
+
   def start
     puts "started"
 
@@ -109,7 +134,7 @@ class DachGUI
       cleanup_processes
       get_job
       get_nodes
-      update
+      run
     rescue
       $stderr.puts $!.to_str
       $!.backtrace.each do | each |
@@ -120,14 +145,6 @@ class DachGUI
     end
 
     puts 'OK'
-  end
-
-
-  def update
-    do_parallel( @run.clusters ) do | each |
-      text = @run.job[ each ].join( ' ' ) + "\n" + @run.node[ each ].join( ' ' )
-      disp_text each, text
-    end
   end
 
 
@@ -222,22 +239,32 @@ class DachGUI
     end
 
     TkButton.new( @root,
-                  'text' => 'Start',  'command' => proc { start } ).pack
+                  'text' => 'Start',
+                  'command' => proc { start } ).pack( 'side' => 'left' )
+    TkButton.new( @root,
+                  'text' => 'Quit',
+                  'command' => proc { cleanup; exit 0 } ).pack( 'side' => 'left' )
   end
 
 
   def disp_text cluster, text
     @f_text[ cluster ].value = text
-    colorize
+    colorize cluster
   end
 
 
-  def colorize
-#     # テキストタグの設定
-#     tag_TargetDay = TkTextTag.new(@f_text, 'background'=>'snow')
-#     tag_P = TkTextTag.new(@f_text, 'foreground'=>'red')
-#     tag_E = TkTextTag.new(@f_text, 'foreground'=>'blue')
-#     tag_M = TkTextTag.new(@f_text, 'foreground'=>'green')
+  def colorize cluster
+    tag_error = TkTextTag.new( @f_text[ cluster ], 'foreground' => 'red' )
+    tag_done = TkTextTag.new( @f_text[ cluster ], 'foreground' => 'blue' )
+    tag_progress = TkTextTag.new( @f_text[ cluster ], 'foreground' => 'green' )
+
+    idx = '0.0'
+    @run.job_inprogress[ cluster ].each do | each |
+      p each
+      if ( idx = @f_text[ cluster ].search( /#{ each }/, "#{ idx } + 1 char", 'end' ) ) != ''
+        @f_text[ cluster ].tag_add( tag_progress, idx, "#{ idx } + 1 char" )
+      end
+    end
 
 #     # 対象日の行への色付け
 #     # 文字列を検索して、テキストタグを割り当てています

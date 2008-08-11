@@ -122,7 +122,8 @@ class Novad
     log "dispatch #{ host } #{ fits }"
 
     job = Job.new( fits, @dach_api.fits_dir )
-    cmd = "ssh #{ host } #{ job.to_cmd }"
+    # cmd = "ssh #{ host } #{ job.to_cmd }"
+    cmd = "ssh #{ host } sleep 30"
 
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |

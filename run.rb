@@ -15,9 +15,11 @@ require 'thread_pool'
 
 class Run
   attr_reader :clusters
+  attr_reader :job
+  attr_reader :job_all
+  attr_reader :job_inprogress
   attr_reader :node
   attr_reader :novad
-  attr_reader :job
 
 
   def initialize problem, clusters
@@ -25,9 +27,15 @@ class Run
     @clusters = clusters
 
     @job = Hash.new( [] )
+    @job_all = Hash.new( [] )
+    @job_inprogress = Hash.new( [] )
     @node = Hash.new( [] )
     @novad = {}
+
     @pool = {}
+    @clusters.each do | each |
+      @pool[ each ] = ThreadPool.new
+    end
   end
 
 
@@ -70,7 +78,7 @@ class Run
     msg "Getting job list on #{ cluster }..."
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
-        @job[ cluster ]  = line.split( ' ' )
+        @job[ cluster ] = @job_all[ cluster ] = line.split( ' ' )
       end
       shell.on_stderr do | line |
         $stderr.puts line
@@ -111,19 +119,41 @@ class Run
   end
 
 
-  def dispatch_first
-    @clusters.each do | c |
-      @pool[ c ] = ThreadPool.new( @node[ c ].size )
+  def finished? cluster
+    @pool[ cluster ].synchronize do
+      @job[ cluster ].empty? and @job_inprogress[ cluster ].empty?
+    end
+  end
 
-      while ( not @node[ c ].empty? ) and ( not @job[ c ].empty? )
-        n = @node[ c ].pop
-        p = @job[ c ].pop
 
-        msg "dispatch #{ p } to #{ n }"
-        @pool[ c ].dispatch( p ) do 
-          dispatch c, n, p
-        end
+  def continue cluster
+    node, job = nil
+
+    action = @pool[ cluster ].synchronize do
+      if ( not @node[ cluster ].empty? ) and ( not @job[ cluster ].empty? )
+        node = @node[ cluster ].pop
+        job = @job[ cluster ].pop
+        :dispatch
+      elsif @node[ cluster ].empty? and ( not @job[ cluster ].empty? )
+        :wait
+      else
+        :shutdown
       end
+    end
+
+    msg action
+
+    case action
+    when :dispatch
+      @pool[ cluster ].dispatch( job ) do 
+        dispatch cluster, node, job
+      end
+    when :wait
+      @pool[ cluster ].wait
+    when :shutdown
+      @pool[ cluster ].shutdown
+    else
+      raise "This shouldn't happen!"
     end
   end
 
@@ -133,48 +163,13 @@ class Run
   ################################################################################
 
 
-  def main
-    dispatch_first
-
-    @pool.collect do | each |
-      c = each[ 0 ]
-      pool = each[ 1 ]
-      Thread.start do
-        pool.shutdown
-#         pool.synchronize do
-#           until @job[ c ].empty?
-#             pool.wait
-#             unless @node[ c ].empty?
-#               n = @node[ c ].pop
-#               p = @job[ c ].pop
-#               pool.dispatch( p ) do 
-#                 dispatch c, n, p
-#               end
-#             end
-#           end
-#        end
-      end
-    end.each do | each |
-      each.join
-    end
-  end
-
-
   def msg str
     puts str
   end
 
 
-  def show_status cluster
-    $stderr.puts cluster
-    $stderr.puts "[#{ @job[ cluster ].join( ', ' ) }]"
-    $stderr.puts "[#{ @node[ cluster ].join( ', ' ) }]"
-  end
-
-
   def dispatch cluster, node, job
     msg "Starting job #{ job } on #{ node }..."
-    show_status cluster
 
     start = Time.now
     r = []
@@ -188,8 +183,10 @@ class Run
       end
 
       shell.on_success do
-        @node[ cluster ] << node
-        show_status cluster
+        @pool[ cluster ].synchronize do
+          @node[ cluster ] << node
+          @job_inprogress[ cluster ].delete job
+        end
 
         time = ( Time.now - start ).to_i
         msg "Job #{ job } on #{ node } finished successfully in #{ time }s."
@@ -203,7 +200,10 @@ class Run
       shell.on_failure do
         raise "job #{ job } on #{ node } failed"
       end
-      
+
+      @pool[ cluster ].synchronize do
+        @job_inprogress[ cluster ] << job
+      end
       shell.exec "ssh dach000@#{ @novad[ cluster ] } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
     end
   end
@@ -261,12 +261,6 @@ class Run
   def result_dir cluster_name
     File.join File.dirname( __FILE__ ), 'results', cluster_name
   end
-end
-
-
-if __FILE__ == $0
-  run = Run.new( ARGV )
-  run.start
 end
 
 
