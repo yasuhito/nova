@@ -110,7 +110,7 @@ class Novad
     end
     nodes = cpus.collect do | each |
       each.name
-    end.uniq
+    end
 
     socket.puts nodes.join( ' ' )
 
@@ -122,12 +122,12 @@ class Novad
     log "dispatch #{ host } #{ fits }"
 
     job = Job.new( fits, @dach_api.fits_dir )
-    # cmd = "ssh #{ host } #{ job.to_cmd }"
-    cmd = "ssh #{ host } ruby /home/dach000/nova/dummy_job.rb" # fails randomly!
+    cmd = "ssh #{ host } #{ job.to_cmd }"
+    # cmd = "ssh #{ host } ruby /home/dach000/nova/dummy_job.rb" # fails randomly!
 
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
-        log "[#{ fits }]: #{ line }"
+        socket.puts line
       end
       shell.on_stderr do | line |
         log "WARN [#{ fits }]: #{ line }"
@@ -160,26 +160,6 @@ class Novad
   def error socket, msg
     log "ERROR: #{ msg }"
     socket.puts "ERROR: #{ msg }"
-  end
-
-
-  def command cmd
-    log "CMD: '#{ cmd }'"
-    system cmd
-#     Popen3::Shell.open do | shell |
-#       shell.on_stdout do | line |
-#         log '  ' + line
-#       end
-#       shell.on_stderr do | line |
-#         log '  ' + line
-#       end
-#       shell.on_failure do
-#         raise %{Command "#{ cmd }" failed.}
-#       end
-      
-#       log "CMD: '#{ cmd }'"
-#       shell.exec cmd
-#     end
   end
 
 

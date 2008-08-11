@@ -14,11 +14,17 @@ require 'socket'
 
 s = TCPSocket.open( 'localhost', 3225 )
 s.puts "dispatch #{ ARGV[ 0 ] } #{ ARGV[ 1 ] }"
-case s.gets
-when /OK/
-  exit 0
-else
-  exit 1
+while l = s.gets
+  case l
+  when /^OK/
+    s.close
+    exit 0
+  when /^ERROR/
+    s.close
+    exit 1
+  else
+    puts l
+  end
 end
 
 
