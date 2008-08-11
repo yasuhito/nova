@@ -6,7 +6,7 @@ require 'socket'
 
 
 s = TCPSocket.open( 'localhost', 3225 )
-s.puts "get_problem #{ ARGV[ 0 ] }"
+s.puts "get_job #{ ARGV[ 0 ] }"
 puts s.gets
 # [TODO] エラー処理: OK か ERROR かで、終了ステータスをちゃんと変える
 

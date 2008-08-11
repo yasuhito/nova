@@ -35,8 +35,8 @@ class Novad
         begin
           command = s.gets.chomp
           case command
-          when /get_problem (.*)/
-            get_problem s, $1
+          when /get_job (.*)/
+            get_job s, $1
           when /get_nodes/
             get_nodes s
           when /dispatch (.*) (.*)/
@@ -88,11 +88,11 @@ class Novad
   end
 
 
-  # [TODO] init せずに get_problem したら怒るべし
-  def get_problem socket, id
+  # [TODO] init せずに get_job したら怒るべし
+  def get_job socket, id
     @dach_api.get_problem id
 
-    log "get_problem #{ id }"
+    log "get_job #{ id }"
     log "TRIAL ID = #{ @dach_api.trial_id }"
     log "FITS DIR = #{ @dach_api.fits_dir }"
 

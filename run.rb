@@ -13,122 +13,100 @@ require 'shell'
 require 'thread_pool'
 
 
-class Thread
-  def self.map list, &block
-    list.collect do | each |
-      self.start do
-        block.call each
-      end
-    end.each do | each |
-      each.join
-    end
-  end
-end
-
-
 class Run
   attr_reader :clusters
-  attr_reader :problem
   attr_reader :node
+  attr_reader :novad
+  attr_reader :job
 
 
-  def initialize clusters
+  def initialize problem, clusters
+    @problem = problem
     @clusters = clusters
-    @problem = Hash.new( [] )
+
+    @job = Hash.new( [] )
     @node = Hash.new( [] )
     @novad = {}
     @pool = {}
   end
 
 
-  def cleanup_results
-    msg 'Cleaning up old *.results...'
-    results.each do | each |
-      FileUtils.rm each
+  def cleanup_results cluster
+    msg "Cleaning up old *.result files for #{ cluster } cluster..."
+    results( cluster ).each do | each |
+      FileUtils.rm each, :verbose => true
     end
   end
 
 
-  def cleanup
-    Thread.map( @novad ) do | each |
-      msg "Cleaning up on #{ each[ 0 ] }..."
-      sh "ssh dach000@#{ each[ 1 ] } ruby /home/dach000/nova/quit.rb", :verbose => false
-    end
+  def cleanup cluster, novad_node
+    msg "Cleaning up on #{ cluster }..."
+    sh "ssh dach000@#{ novad_node } ruby /home/dach000/nova/quit.rb"
   end
 
 
-  def start_novad
-    Thread.map( @clusters ) do | each |
-      c = Clusters.list( each.to_sym )
-      novad_node = [ c[ :list ].first, c[ :domain ] ].join( '.' )
-      begin
-        msg "Starting novad on #{ novad_node }..."
-        system "ssh dach000@#{ novad_node } ruby /home/dach000/nova/novad.rb"
-        msg "novad started on #{ novad_node }."
-      rescue
-        msg "Failed to start novad on #{ novad_node }"
+  def start_novad cluster
+    c = Clusters.list( cluster.to_sym )
+    novad_node = [ c[ :list ].first, c[ :domain ] ].join( '.' )
+
+    msg "Starting novad on #{ novad_node }"
+    sh "ssh dach000@#{ novad_node } ruby /home/dach000/nova/novad.rb"
+
+    msg "novad started on #{ novad_node }"
+    @novad[ cluster ] = novad_node
+  end
+
+
+  def cleanup_processes cluster
+    msg "Cleaning up dach processes on #{ cluster }..." 
+    gxpc_init cluster
+    gxpc_killall cluster
+    gxpc_dachmon cluster
+    gxpc_quit cluster
+  end
+
+
+  def get_job cluster
+    msg "Getting job list on #{ cluster }..."
+    Popen3::Shell.open do | shell |
+      shell.on_stdout do | line |
+        @job[ cluster ]  = line.split( ' ' )
       end
-      @novad[ each ] = novad_node
-    end
-  end
-
-
-  def cleanup_processes
-    Thread.map( @clusters ) do | each |
-      msg "Cleaning up processes on #{ each }..." 
-      gxpc_init each
-      gxpc_killall each
-      gxpc_dachmon each
-      gxpc_quit each
-    end
-  end
-
-
-  def get_problem
-    Thread.map( @clusters ) do | each |
-      msg "Getting problem list on #{ each }..."
-      Popen3::Shell.open do | shell |
-        shell.on_stdout do | line |
-          @problem[ each ]  = line.split( ' ' )
-        end
-        shell.on_stderr do | line |
-          $stderr.puts line
-        end
-
-        shell.on_success do
-          msg "#{ each }: #{ @problem[ each ].size } pairs."
-        end
-        shell.on_failure do
-          raise "get_problem on #{ each } failed"
-        end
-        
-        shell.exec "ssh dach000@#{ @novad[ each ] } ruby /home/dach000/nova/get_problem.rb sample0"
+      shell.on_stderr do | line |
+        $stderr.puts line
       end
+      
+      shell.on_success do
+        msg "#{ cluster }: #{ @job[ cluster ].size } pairs."
+      end
+      shell.on_failure do
+        raise "get_job on #{ cluster } failed"
+      end
+      
+      shell.exec "ssh dach000@#{ @novad[ cluster ] } ruby /home/dach000/nova/get_job.rb #{ @problem }"
     end
   end
 
 
-  def get_nodes
-    Thread.map( @clusters ) do | each |
-      msg "Getting node list on #{ each }..."
+  def get_nodes cluster
+    msg "Getting node list on #{ cluster }..."
 
-      Popen3::Shell.open do | shell |
-        shell.on_stdout do | line |
-          @node[ each ] = line.split( ' ' )
-        end
-        shell.on_stderr do | line |
-          $stderr.puts line
-        end
-
-        shell.on_success do
-          msg "#{ each }: #{ @node[ each ].size } nodes."
-        end
-        shell.on_failure do
-          raise "get_nodes on #{ each } failed"
-        end
-        
-        shell.exec "ssh dach000@#{ @novad[ each ] } ruby /home/dach000/nova/get_nodes.rb"
+    Popen3::Shell.open do | shell |
+      shell.on_stdout do | line |
+        @node[ cluster ] = line.split( ' ' )
       end
+      shell.on_stderr do | line |
+        $stderr.puts line
+      end
+
+      shell.on_success do
+        msg "#{ cluster }: #{ @node[ cluster ].size } nodes."
+      end
+      shell.on_failure do
+        raise "get_nodes on #{ cluster } failed"
+      end
+      
+      shell.exec "ssh dach000@#{ @novad[ cluster ] } ruby /home/dach000/nova/get_nodes.rb"
     end
   end
 
@@ -137,9 +115,9 @@ class Run
     @clusters.each do | c |
       @pool[ c ] = ThreadPool.new( @node[ c ].size )
 
-      while ( not @node[ c ].empty? ) and ( not @problem[ c ].empty? )
+      while ( not @node[ c ].empty? ) and ( not @job[ c ].empty? )
         n = @node[ c ].pop
-        p = @problem[ c ].pop
+        p = @job[ c ].pop
 
         msg "dispatch #{ p } to #{ n }"
         @pool[ c ].dispatch( p ) do 
@@ -164,11 +142,11 @@ class Run
       Thread.start do
         pool.shutdown
 #         pool.synchronize do
-#           until @problem[ c ].empty?
+#           until @job[ c ].empty?
 #             pool.wait
 #             unless @node[ c ].empty?
 #               n = @node[ c ].pop
-#               p = @problem[ c ].pop
+#               p = @job[ c ].pop
 #               pool.dispatch( p ) do 
 #                 dispatch c, n, p
 #               end
@@ -189,13 +167,13 @@ class Run
 
   def show_status cluster
     $stderr.puts cluster
-    $stderr.puts "[#{ @problem[ cluster ].join( ', ' ) }]"
+    $stderr.puts "[#{ @job[ cluster ].join( ', ' ) }]"
     $stderr.puts "[#{ @node[ cluster ].join( ', ' ) }]"
   end
 
 
-  def dispatch cluster, node, problem
-    msg "Starting problem #{ problem } on #{ node }..."
+  def dispatch cluster, node, job
+    msg "Starting job #{ job } on #{ node }..."
     show_status cluster
 
     start = Time.now
@@ -214,8 +192,8 @@ class Run
         show_status cluster
 
         time = ( Time.now - start ).to_i
-        msg "Problem #{ problem } on #{ node } finished successfully in #{ time }s."
-        File.open( result_path( cluster, problem, time ), 'w' ) do | f |
+        msg "Job #{ job } on #{ node } finished successfully in #{ time }s."
+        File.open( result_path( cluster, job, time ), 'w' ) do | f |
           r.each do | l |
             f.puts l
           end
@@ -223,10 +201,10 @@ class Run
       end
 
       shell.on_failure do
-        raise "problem #{ problem } on #{ node } failed"
+        raise "job #{ job } on #{ node } failed"
       end
       
-      shell.exec "ssh dach000@#{ @novad[ cluster ] } ruby /home/dach000/nova/dispatch.rb #{ node } #{ problem }"
+      shell.exec "ssh dach000@#{ @novad[ cluster ] } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
     end
   end
 
@@ -270,10 +248,8 @@ class Run
   end
 
 
-  def results
-    @clusters.collect do | each |
-      Dir.glob File.join( result_dir( each ), '*.result' )
-    end.flatten
+  def results cluster
+    Dir.glob File.join( result_dir( cluster ), '*.result' )
   end
 
 
