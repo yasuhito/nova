@@ -106,7 +106,7 @@ class Run
     
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
-        @node = line.split( ' ' )
+        @node = line.split( ' ' ) * Clusters.list( @cluster.to_sym )[ :cpu_num ]
         @node_left = @node.dup
       end
       shell.on_stderr do | line |
@@ -207,20 +207,7 @@ class Run
         end
       end
       
-      begin
-        shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
-      rescue
-        # Handle 'Too amany open files' error
-        @pool.synchronize do
-          $stderr.puts Log.pink( "job #{ job } on #{ node } failed" )
-
-          @node_left << node
-          @node_inuse.delete node
-
-          @job_inprogress.delete job
-          @job_left << job
-        end
-      end
+      shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
     end
   end
 
