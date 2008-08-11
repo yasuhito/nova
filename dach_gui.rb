@@ -5,8 +5,8 @@
 $LOAD_PATH.unshift File.dirname( __FILE__ )
 
 
+require 'dach'
 require 'run'
-require 'thread_pool'
 require 'tk'
 
 
@@ -47,7 +47,7 @@ class TextFrame < TkText
 end
 
 
-class DachGUI
+class DachGUI < Dach
   def initialize problem, *clusters
     @run = Run.new( problem, clusters )
 
@@ -127,13 +127,6 @@ class DachGUI
   end
 
 
-  def cleanup
-    do_parallel( @run.novad ) do | each |
-      @run.cleanup *each
-    end     
-  end
-
-
   def cleanup_results
     do_parallel( @run.clusters ) do | each |
       show_status each, 'Cleaning up old *.result files...'
@@ -163,15 +156,6 @@ class DachGUI
       @run.start_novad each
       show_status each, ''
     end
-  end
-
-
-  def do_parallel list, &block
-    pool = ThreadPool.new
-    list.each do | each |
-      pool.dispatch each, &block
-    end
-    pool.shutdown
   end
 
 

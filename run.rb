@@ -25,133 +25,129 @@ class Run
   attr_reader :novad
 
 
-  def initialize problem, clusters
+  def initialize problem, cluster
     @problem = problem
-    @clusters = clusters
+    @cluster = cluster
 
-    @job = Hash.new( [] )
-    @job_left = Hash.new( [] )
-    @job_inprogress = Hash.new( [] )
-    @job_done = Hash.new( [] )
+    @job = []
+    @job_left = []
+    @job_inprogress = []
+    @job_done = []
 
-    @node = Hash.new( [] )
-    @node_left = Hash.new( [] )
-    @node_inuse = Hash.new( [] )
-    @novad = {}
+    @node = []
+    @node_left = []
+    @node_inuse = []
 
-    @pool = {}
-    @clusters.each do | each |
-      @pool[ each ] = ThreadPool.new
-    end
+    @pool = ThreadPool.new
   end
 
 
-  def cleanup_results cluster
-    msg "Cleaning up old *.result files for #{ cluster } cluster..."
-    results( cluster ).each do | each |
+  def cleanup_results
+    msg "Cleaning up old *.result files for #{ @cluster } cluster..."
+    results.each do | each |
       FileUtils.rm each, :verbose => true
     end
   end
 
 
-  def cleanup cluster, novad_node
-    msg "Cleaning up on #{ cluster }..."
-    sh "ssh dach000@#{ novad_node } ruby /home/dach000/nova/quit.rb"
+  def cleanup
+    msg "Cleaning up on #{ @cluster }..."
+    sh "ssh dach000@#{ @novad } ruby /home/dach000/nova/quit.rb"
   end
 
 
-  def start_novad cluster
-    c = Clusters.list( cluster.to_sym )
+  def start_novad
+    c = Clusters.list( @cluster.to_sym )
     novad_node = [ c[ :list ].first, c[ :domain ] ].join( '.' )
 
     msg "Starting novad on #{ novad_node }"
     sh "ssh dach000@#{ novad_node } ruby /home/dach000/nova/novad.rb"
 
     msg "novad started on #{ novad_node }"
-    @novad[ cluster ] = novad_node
+    @novad = novad_node
   end
 
 
-  def cleanup_processes cluster
-    msg "Cleaning up dach processes on #{ cluster }..." 
-    gxpc_init cluster
-    gxpc_killall cluster
-    gxpc_dachmon cluster
-    gxpc_quit cluster
+  def cleanup_processes
+    msg "Cleaning up dach processes on #{ @cluster }..." 
+    gxpc_init
+    gxpc_killall
+    gxpc_dachmon
+    gxpc_quit
   end
 
 
-  def get_job cluster
-    msg "Getting job list on #{ cluster }..."
+  def get_job
+    msg "Getting job list on #{ @cluster }..."
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
-        @job[ cluster ] = line.split( ' ' )
-        @job_left[ cluster ] = @job[ cluster ].dup
+        @job = line.split( ' ' )
+        @job_left = @job.dup
       end
       shell.on_stderr do | line |
         $stderr.puts line
       end
       
       shell.on_success do
-        msg "#{ cluster }: #{ @job[ cluster ].size } pairs."
+        msg "#{ @cluster }: #{ @job.size } pairs."
       end
       shell.on_failure do
-        raise "get_job on #{ cluster } failed"
+        raise "get_job on #{ @cluster } failed"
       end
       
-      shell.exec "ssh dach000@#{ @novad[ cluster ] } ruby /home/dach000/nova/get_job.rb #{ @problem }"
+      shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/get_job.rb #{ @problem }"
     end
   end
 
 
-  def get_nodes cluster
-    msg "Getting node list on #{ cluster }..."
-
+  def get_nodes
+    msg "Getting node list on #{ @cluster }..."
+    
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
-        @node[ cluster ] = line.split( ' ' )
-        @node_left[ cluster ] = @node[ cluster ].dup
+        @node = line.split( ' ' )
+        @node_left = @node.dup
       end
       shell.on_stderr do | line |
         $stderr.puts line
       end
 
       shell.on_success do
-        msg "#{ cluster }: #{ @node[ cluster ].size } nodes."
+        msg "#{ @cluster }: #{ @node.size } nodes."
       end
       shell.on_failure do
-        raise "get_nodes on #{ cluster } failed"
+        raise "get_nodes on #{ @cluster } failed"
       end
       
-      shell.exec "ssh dach000@#{ @novad[ cluster ] } ruby /home/dach000/nova/get_nodes.rb"
+      shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/get_nodes.rb"
     end
   end
 
 
-  def finished? cluster
-    @pool[ cluster ].synchronize do
-      @job_left[ cluster ].empty? and @job_inprogress[ cluster ].empty?
-    end
+  def finished?
+    @job_left.empty? and @job_inprogress.empty?
   end
 
 
-  def continue cluster
+  def continue
     node, job = nil
 
-    @pool[ cluster ].synchronize do
-      if ( not @node_left[ cluster ].empty? ) and ( not @job_left[ cluster ].empty? )
-        node = @node_left[ cluster ].shift
-        @node_inuse[ cluster ] << node
-        job = @job_left[ cluster ].shift
+    @pool.synchronize do
+      if ( not @node_left.empty? ) and ( not @job_left.empty? )
+        node = @node_left.shift
+        @node_inuse << node
+
+        job = @job_left.shift
+        @job_inprogress << job
       end
     end
 
     if node and job
-      @pool[ cluster ].dispatch( job ) do 
-        dispatch cluster, node, job
+      @pool.dispatch( job ) do 
+        dispatch node, job
       end
     else
-      @pool[ cluster ].wait
+      sleep 1
     end
   end
 
@@ -166,7 +162,7 @@ class Run
   end
 
 
-  def dispatch cluster, node, job
+  def dispatch node, job
     msg "Starting job #{ job } on #{ node }..."
 
     start = Time.now
@@ -181,17 +177,17 @@ class Run
       end
 
       shell.on_success do
-        @pool[ cluster ].synchronize do
-          @node_left[ cluster ] << node
-          @node_inuse[ cluster ].delete node
-          @job_left[ cluster ].delete job
-          @job_inprogress[ cluster ].delete job
-          @job_done[ cluster ] << job
+        @pool.synchronize do
+          @node_left << node
+          @node_inuse.delete node
+
+          @job_inprogress.delete job
+          @job_done << job
         end
 
         time = ( Time.now - start ).to_i
         msg "Job #{ job } on #{ node } finished successfully in #{ time }s."
-        File.open( result_path( cluster, job, time ), 'w' ) do | f |
+        File.open( result_path( job, time ), 'w' ) do | f |
           r.each do | l |
             f.puts l
           end
@@ -202,65 +198,62 @@ class Run
         raise "job #{ job } on #{ node } failed"
       end
 
-      @pool[ cluster ].synchronize do
-        @job_inprogress[ cluster ] << job
-      end
-      shell.exec "ssh dach000@#{ @novad[ cluster ] } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
+      shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
     end
   end
 
 
-  def gxpc_init cluster
-    sh "ssh dach000@#{ @novad[ cluster ] } gxpc quit", :verbose => false
-    sh "ssh dach000@#{ @novad[ cluster ] } gxpc use ssh #{ cluster }", :verbose => false
+  def gxpc_init
+    sh "ssh dach000@#{ @novad } gxpc quit"
+    sh "ssh dach000@#{ @novad } gxpc use ssh #{ @cluster }"
 
     Popen3::Shell.open do | shell |
       shell.on_success do
-        msg "gxpc explore on #{ cluster } succeeded."
+        msg "gxpc explore on #{ @cluster } succeeded."
       end
       shell.on_failure do
-        raise "gxpc explore on #{ cluster } failed."
+        raise "gxpc explore on #{ @cluster } failed."
       end
-      first = Clusters.list( cluster.to_sym )[ :list ].first.tr( cluster, '' )
-      last = Clusters.list( cluster.to_sym )[ :list ].last.tr( cluster, '' )
-      shell.exec "ssh dach000@#{ @novad[ cluster ] } gxpc explore #{ cluster }[[#{ first }-#{ last }]]"
+      first = Clusters.list( @cluster.to_sym )[ :list ].first.tr( @cluster, '' )
+      last = Clusters.list( @cluster.to_sym )[ :list ].last.tr( @cluster, '' )
+      shell.exec "ssh dach000@#{ @novad } gxpc explore #{ @cluster }[[#{ first }-#{ last }]]"
     end
   end
 
 
   # [???] ほかに pkill すべきプロセスは？？
   # [???] pkill する順番は？
-  def gxpc_killall cluster
-    sh "ssh dach000@#{ @novad[ cluster ] } gxpc e pkill detect3", :verbose => false
-    sh "ssh dach000@#{ @novad[ cluster ] } gxpc e pkill match2", :verbose => false
-    sh "ssh dach000@#{ @novad[ cluster ] } gxpc e pkill mask3", :verbose => false
-    sh "ssh dach000@#{ @novad[ cluster ] } gxpc e pkill sex", :verbose => false
-    sh "ssh dach000@#{ @novad[ cluster ] } gxpc e pkill imsub3vp3", :verbose => false
+  def gxpc_killall
+    sh "ssh dach000@#{ @novad } gxpc e pkill detect3"
+    sh "ssh dach000@#{ @novad } gxpc e pkill match2"
+    sh "ssh dach000@#{ @novad } gxpc e pkill mask3"
+    sh "ssh dach000@#{ @novad } gxpc e pkill sex"
+    sh "ssh dach000@#{ @novad } gxpc e pkill imsub3vp3"
   end
 
 
-  def gxpc_dachmon cluster
-    sh "ssh dach000@#{ @novad[ cluster ] } gxpc e /home/dach000/nova/dachmon.rb", :verbose => false
+  def gxpc_dachmon
+    sh "ssh dach000@#{ @novad } gxpc e /home/dach000/nova/dachmon.rb"
   end
 
 
-  def gxpc_quit cluster
-    sh "ssh dach000@#{ @novad[ cluster ] } gxpc quit", :verbose => false
+  def gxpc_quit
+    sh "ssh dach000@#{ @novad } gxpc quit"
   end
 
 
-  def results cluster
-    Dir.glob File.join( result_dir( cluster ), '*.result' )
+  def results
+    Dir.glob File.join( result_dir, '*.result' )
   end
 
 
-  def result_path cluster, job, sec
-    File.join result_dir( cluster ), "#{ job }.in#{ sec }s.result"
+  def result_path job, sec
+    File.join result_dir, "#{ job }.in#{ sec }s.result"
   end
 
 
-  def result_dir cluster_name
-    File.join File.dirname( __FILE__ ), 'results', cluster_name
+  def result_dir
+    File.join File.dirname( __FILE__ ), 'results', @cluster
   end
 end
 

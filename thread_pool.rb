@@ -16,7 +16,10 @@ class ThreadPool
         @pool << Thread.current
         yield *args
       rescue => e
-        exception job, e
+        $stderr.puts Log.pink( $!.to_str )
+        $!.backtrace.each do | each |
+          $stderr.puts each
+        end
       ensure
         @pool_mutex.synchronize do
           # Remove the thread from the pool.
@@ -49,16 +52,6 @@ class ThreadPool
         @pool_cv.wait @pool_mutex
       end
     end
-  end
-
-
-  ################################################################################
-  private
-  ################################################################################
-  
-
-  def exception job, exception
-    $stderr.puts Log.pink( "Job #{ job } failed: #{ exception }" )
   end
 end
 
