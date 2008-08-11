@@ -206,8 +206,21 @@ class Run
           @job_left << job
         end
       end
+      
+      begin
+        shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
+      rescue
+        # Handle 'Too amany open files' error
+        @pool.synchronize do
+          $stderr.puts Log.pink( "job #{ job } on #{ node } failed" )
 
-      shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
+          @node_left << node
+          @node_inuse.delete node
+
+          @job_inprogress.delete job
+          @job_left << job
+        end
+      end
     end
   end
 

@@ -51,7 +51,7 @@ class DachCUI < Dach
       @run[ each ].cleanup_processes
       @run[ each ].get_job
       @run[ each ].get_nodes
-      $stderr.puts "*** Setup finished on #{ each } ***"
+      puts "*** Setup finished on #{ each } ***"
     end      
   end
 
@@ -72,9 +72,9 @@ class DachCUI < Dach
       inprogress = Log.green( '#' ) * @run[ each ].job_inprogress.size
       left = '#' * @run[ each ].job_left.size
 
-      $stderr.puts sprintf( "%10s: %s", each, done + inprogress + left )
+      puts sprintf( "%10s: %s", each, done + inprogress + left )
     end
-    $stderr.puts
+    puts
   end
 end
 

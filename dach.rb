@@ -3,11 +3,11 @@ require 'thread_pool'
 
 class Dach
   def do_parallel list, &block
-    @pool = ThreadPool.new
+    pool = ThreadPool.new
     list.each do | each |
-      @pool.dispatch each, &block
+      pool.dispatch each, &block
     end
-    @pool.shutdown
+    pool.shutdown
   end
 
 
