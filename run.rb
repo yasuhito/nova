@@ -8,6 +8,7 @@ $LOAD_PATH.unshift File.dirname( __FILE__ )
 require 'rubygems'
 
 require 'clusters'
+require 'log'
 require 'rake'
 require 'shell'
 require 'thread_pool'
@@ -195,7 +196,15 @@ class Run
       end
 
       shell.on_failure do
-        raise "job #{ job } on #{ node } failed"
+        @pool.synchronize do
+          $stderr.puts Log.pink( "job #{ job } on #{ node } failed" )
+
+          @node_left << node
+          @node_inuse.delete node
+
+          @job_inprogress.delete job
+          @job_left << job
+        end
       end
 
       shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"

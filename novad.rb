@@ -123,11 +123,11 @@ class Novad
 
     job = Job.new( fits, @dach_api.fits_dir )
     # cmd = "ssh #{ host } #{ job.to_cmd }"
-    cmd = "ssh #{ host } sleep #{ rand( 30 ) }"
+    cmd = "ssh #{ host } ruby /home/dach000/nova/dummy_job.rb" # fails randomly!
 
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
-        socket.puts line
+        log "[#{ fits }]: #{ line }"
       end
       shell.on_stderr do | line |
         log "WARN [#{ fits }]: #{ line }"
