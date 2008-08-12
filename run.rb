@@ -24,6 +24,7 @@ class Run
   attr_reader :node_inuse
   attr_reader :node_left
   attr_reader :novad
+  attr_reader :trial_id
 
 
   def initialize problem, cluster
@@ -82,8 +83,12 @@ class Run
     msg "Getting job list on #{ @cluster }..."
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
-        @job = line.split( ' ' )
-        @job_left = @job.dup
+        if /^ID (.*)/=~ line
+          @trial_id = $1
+        else
+          @job = line.split( ' ' )
+          @job_left = @job.dup
+        end
       end
       shell.on_stderr do | line |
         $stderr.puts line
@@ -150,6 +155,16 @@ class Run
     else
       sleep 1
     end
+  end
+
+
+  def check_ans final_result
+    sh "/home/dach911/dach_api/dach_api --check_ans #{ @trial_id } #{ final_result }"
+  end
+
+
+  def results
+    Dir.glob File.join( result_dir, '*.result' )
   end
 
 
@@ -248,11 +263,6 @@ class Run
 
   def gxpc_quit
     sh "ssh dach000@#{ @novad } gxpc quit"
-  end
-
-
-  def results
-    Dir.glob File.join( result_dir, '*.result' )
   end
 
 

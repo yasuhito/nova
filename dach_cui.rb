@@ -1,8 +1,11 @@
 #!/usr/bin/env ruby
 
 
+require 'rubygems'
+
 require 'clusters'
 require 'dach'
+require 'rake'
 require 'run'
 
 
@@ -27,6 +30,7 @@ class DachCUI < Dach
     begin
       setup
       run
+      check_ans
     rescue
       $stderr.puts $!.to_str
       $!.backtrace.each do | each |
@@ -44,6 +48,23 @@ class DachCUI < Dach
   ################################################################################
 
 
+  def check_ans
+    if @run[ 'hongo' ]
+      results = @clusters.collect do | each |
+        @run[ each ].results
+      end.flatten
+
+      sh "cat #{ results.join( ' ' ) } > #{ result }"
+      @run[ 'hongo' ].check_ans result
+    end
+  end
+
+
+  def result
+    File.expand_path File.join( File.dirname( __FILE__ ), 'all.result' )
+  end
+
+
   def setup
     do_parallel( @clusters ) do | each |
       @run[ each ].cleanup_results
@@ -52,7 +73,16 @@ class DachCUI < Dach
       @run[ each ].get_job
       @run[ each ].get_nodes
       puts "*** Setup finished on #{ each } ***"
-    end      
+    end
+
+    if @run[ 'hongo' ]
+      sh "echo #{ @run[ 'hongo' ].trial_id } > #{ trial_id }"
+    end
+  end
+
+
+  def trial_id
+    File.expand_path File.join( File.dirname( __FILE__ ), 'trial_id' )
   end
 
 

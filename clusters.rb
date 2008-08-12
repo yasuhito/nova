@@ -1,16 +1,16 @@
 class Clusters
   def self.all
-    [ :kyushu, :hiro, :kyoto, :kobe, :suzuk, :imade, :chiba, :mirai, :hongo, :okubo ] # :keio, :pad
+    [ :kyushu, :hiro, :kyoto, :kobe, :suzuk, :imade, :chiba, :mirai, :hongo, :okubo, :pad ] # :keio
   end
 
 
   def self.list name
     { 
       :pad => { 
-        :cpu_num => 2, # [FIXME]
+        :cpu_num => 4,
         :domain => 'titech.hpcc.jp',
-        :list => [ 'pad039',
-                   'pad040', 'pad041', 'pad042', 'pad043', 'pad044', 'pad045', 'pad046', 'pad047', 'pad048', 'pad049',
+        :list => [ 'pad041',
+                   'pad040', 'pad039', 'pad042', 'pad043', 'pad044', 'pad045', 'pad046', 'pad047', 'pad048', 'pad049',
                    'pad050', 'pad051', 'pad052', 'pad053', 'pad054', 'pad055', 'pad056', 'pad057', 'pad058', 'pad059',
                    'pad060', 'pad061', 'pad062', 'pad063', 'pad064', 'pad065', 'pad066', 'pad067', 'pad068', 'pad069',
                    'pad070', 'pad071', 'pad072', 'pad073', 'pad074', 'pad075', 'pad076', 'pad077', 'pad078', 'pad079',
