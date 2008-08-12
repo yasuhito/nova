@@ -123,8 +123,8 @@ class Novad
     log "dispatch #{ host } #{ fits }"
 
     job = Job.new( fits, @dach_api.fits_dir )
-    # cmd = "ssh #{ host } #{ job.to_cmd }"
-    cmd = "ssh #{ host } ruby /home/dach000/nova/dummy_job.rb" # fails randomly!
+    cmd = "ssh #{ host } #{ job.to_cmd }"
+    # cmd = "ssh #{ host } ruby /home/dach000/nova/dummy_job.rb" # fails randomly!
 
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
