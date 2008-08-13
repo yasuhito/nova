@@ -14,7 +14,7 @@ require 'shell'
 require 'thread_pool'
 
 
-class Run
+class Cluster
   attr_reader :clusters
   attr_reader :job
   attr_reader :job_done

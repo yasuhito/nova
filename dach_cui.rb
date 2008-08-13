@@ -1,6 +1,6 @@
+require 'cluster'
 require 'clusters'
 require 'log'
-require 'run'
 
 
 class DachCUI
@@ -11,20 +11,20 @@ class DachCUI
     Clusters.all.collect do | each |
       each.to_s
     end.each do | each |
-      next if Run[ each ].nil?
+      next if Cluster[ each ].nil?
 
       puts "[#{ each.capitalize } Cluster]"
 
       # CPU status
-      inuse = Log.orange( '#' ) * Run[ each ].job_inprogress.size
-      node_left = '#' * ( Run[ each ].node.size - Run[ each ].job_inprogress.size )
-      puts sprintf( "   %3d CPU: %s", Run[ each ].node.size, inuse + node_left )
+      inuse = Log.orange( '#' ) * Cluster[ each ].job_inprogress.size
+      node_left = '#' * ( Cluster[ each ].node.size - Cluster[ each ].job_inprogress.size )
+      puts sprintf( "   %3d CPU: %s", Cluster[ each ].node.size, inuse + node_left )
 
       # Job status
-      done = Log.slate( '#' ) * Run[ each ].job_done.size
-      inprogress = Log.green( '#' ) * Run[ each ].job_inprogress.size
-      job_left = '#' * ( Run[ each ].job.size - Run[ each ].job_done.size - Run[ each ].job_inprogress.size )
-      puts sprintf( "   %3d Job: %s", Run[ each ].job.size, done + inprogress + job_left )
+      done = Log.slate( '#' ) * Cluster[ each ].job_done.size
+      inprogress = Log.green( '#' ) * Cluster[ each ].job_inprogress.size
+      job_left = '#' * ( Cluster[ each ].job.size - Cluster[ each ].job_done.size - Cluster[ each ].job_inprogress.size )
+      puts sprintf( "   %3d Job: %s", Cluster[ each ].job.size, done + inprogress + job_left )
 
       puts
     end

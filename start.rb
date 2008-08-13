@@ -10,10 +10,10 @@
 $LOAD_PATH.unshift File.dirname( __FILE__ )
 
 
+require 'cluster'
 require 'clusters'
 require 'dach_cui'
 require 'log'
-require 'run'
 
 
 class App
@@ -27,7 +27,7 @@ class App
     end
 
     @clusters.each do | each |
-      Run.new each, problem
+      Cluster.new each, problem
     end
   end
 
@@ -58,30 +58,30 @@ class App
 
   def run
     do_parallel( @clusters ) do | each |
-      until Run[ each ].finished?
-        Run[ each ].continue
+      until Cluster[ each ].finished?
+        Cluster[ each ].continue
       end
-      Run[ each ].shutdown
+      Cluster[ each ].shutdown
     end
   end
 
 
   def setup
     do_parallel( @clusters ) do | each |
-      Run[ each ].cleanup_results
-      Run[ each ].gxpc_init
-      Run[ each ].cleanup_processes
-      Run[ each ].start_dachmon
-      Run[ each ].gxpc_quit
-      Run[ each ].start_novad
-      Run[ each ].get_job
-      Run[ each ].get_nodes
+      Cluster[ each ].cleanup_results
+      Cluster[ each ].gxpc_init
+      Cluster[ each ].cleanup_processes
+      Cluster[ each ].start_dachmon
+      Cluster[ each ].gxpc_quit
+      Cluster[ each ].start_novad
+      Cluster[ each ].get_job
+      Cluster[ each ].get_nodes
       puts "[#{ each }] *** Setup finished ***"
     end
     puts '****** All setup finished ******'
 
-    if Run[ 'hongo' ]
-      sh "echo #{ Run[ 'hongo' ].trial_id } > #{ trial_id }"
+    if Cluster[ 'hongo' ]
+      sh "echo #{ Cluster[ 'hongo' ].trial_id } > #{ trial_id }"
     end
   end
 
@@ -100,19 +100,19 @@ class App
     system 'pkill -9 -u dach000 -f dispatch.rb'
 
     do_parallel( @clusters ) do | each |
-      Run[ each ].teardown
+      Cluster[ each ].teardown
     end     
   end
 
 
   def check_ans
-    if Run[ 'hongo' ]
+    if Cluster[ 'hongo' ]
       results = @clusters.collect do | each |
-        Run[ each ].results
+        Cluster[ each ].results
       end.flatten
 
       sh "cat #{ results.join( ' ' ) } > #{ result }", :verbose => false
-      Run[ 'hongo' ].check_ans result
+      Cluster[ 'hongo' ].check_ans result
     end
   end
 
