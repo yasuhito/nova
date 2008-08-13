@@ -9,6 +9,7 @@ require 'rubygems'
 
 require 'clusters'
 require 'log'
+require 'novad_client'
 require 'rake'
 require 'shell'
 require 'thread_pool'
@@ -50,6 +51,7 @@ class Cluster
 
     c = Clusters.list( @cluster.to_sym )
     @novad = [ c[ :list ].first, c[ :domain ] ].join( '.' )
+    @novad_client = NovadClient.new( @novad )
 
     @@list[ cluster ] = self
   end
@@ -220,53 +222,44 @@ class Cluster
   def dispatch node, job
     start = Time.now
     r = []
-    Popen3::Shell.open do | shell |
-      shell.on_stdout do | line |
-        r << line.chomp
-      end
 
-      shell.on_stderr do | line |
-        $stderr.puts line
-      end
-
-      shell.on_success do
-        @pool.synchronize do
-          @node_left << node
-          @job_inprogress.delete job
-          @job_done << job
-          DachCUI.show_status
-        end
-
-        time = ( Time.now - start ).to_i
-        Log.info "Job #{ job } on #{ node } finished successfully in #{ time }s."
-        File.open( result_path( job, time ), 'w' ) do | f |
-          r.each do | l |
-            f.puts l
-          end
-        end
-      end
-
-      shell.on_failure do
-        @pool.synchronize do
-          Log.error "Job #{ job } on #{ node } failed"
-          @node_left << node
-          @job_inprogress.delete job
-          @job_left << job
-          DachCUI.show_status
-        end
-      end
-
+    begin
       Log.info "Starting job #{ job } on #{ node }..."
-      begin
-        @pool.synchronize do
-          @job_inprogress << job
-          DachCUI.show_status
-        end
-        shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
-      rescue
-        Log.error $!.to_s
-        @job_inprogress.delete job
+      @pool.synchronize do
+        @job_inprogress << job
+        DachCUI.show_status
       end
+
+      r = @novad_client.dispatch( node, job )
+
+      @pool.synchronize do
+        @node_left << node
+        @job_inprogress.delete job
+        @job_done << job
+        DachCUI.show_status
+      end
+
+      time = ( Time.now - start ).to_i
+      Log.info "Job #{ job } on #{ node } finished successfully in #{ time }s."
+      File.open( result_path( job, time ), 'w' ) do | f |
+        r.each do | l |
+          f.puts l
+        end
+      end
+    rescue RuntimeError
+      @pool.synchronize do
+        Log.error "Job #{ job } on #{ node } failed"
+        @node_left << node
+        @job_inprogress.delete job
+        @job_left << job
+        DachCUI.show_status
+      end
+    rescue
+      Log.error $!.inspect
+      $!.backtrace.each do | each |
+        Log.error each
+      end
+      @job_inprogress.delete job
     end
   end
 
