@@ -167,6 +167,8 @@ class Cluster
         while ( job = @job_left.shift ) do 
           if Jobs.assigned?( job )
             Log.warn "Job #{ job } already assigned. skipping..."
+            @job_done << job
+            DachCUI.show_status
           else
             break
           end
