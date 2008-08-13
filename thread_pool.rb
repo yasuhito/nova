@@ -27,11 +27,11 @@ class ThreadPool
 
       begin
         @pool << Thread.current
-        yield *args
+        yield( *args )
       rescue => e
-        $stderr.puts Log.pink( $!.to_str )
+        Log.error $!.to_str
         $!.backtrace.each do | each |
-          $stderr.puts each
+          Log.error each
         end
       ensure
         @pool_mutex.synchronize do

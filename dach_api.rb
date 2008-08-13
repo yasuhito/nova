@@ -11,8 +11,9 @@ class DachAPI
     @problem_id = problem_id
 
     cmd = "#{ dach_api } --get_problem #{ @problem_id }"
-    unless /\A(\S+) (\S+)\Z/=~ `#{ cmd }`.chomp
-      raise "Parse Error! #{ cmd }"
+    output = `#{ cmd }`.chomp
+    unless /\A(\S+) (\S+)\Z/=~ output
+      raise "Parse Error! #{ output }"
     end
 
     @trial_id = $1

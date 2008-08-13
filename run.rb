@@ -26,9 +26,17 @@ class Run
   attr_reader :trial_id
 
 
-  def initialize problem, cluster
-    @problem = problem
+  @@list = {}
+
+
+  def self.[] name
+    @@list[ name ]
+  end
+
+
+  def initialize cluster, problem
     @cluster = cluster
+    @problem = problem
 
     @job = []
     @job_left = []
@@ -42,6 +50,8 @@ class Run
 
     c = Clusters.list( @cluster.to_sym )
     @novad = [ c[ :list ].first, c[ :domain ] ].join( '.' )
+
+    @@list[ cluster ] = self
   end
 
 
@@ -64,6 +74,11 @@ class Run
     rescue
       nil
     end
+  end
+
+
+  def shutdown
+    @pool.shutdown
   end
 
 
@@ -219,6 +234,7 @@ class Run
           @node_left << node
           @job_inprogress.delete job
           @job_done << job
+          DachCUI.show_status
         end
 
         time = ( Time.now - start ).to_i
@@ -233,18 +249,24 @@ class Run
       shell.on_failure do
         @pool.synchronize do
           Log.error "Job #{ job } on #{ node } failed"
-
           @node_left << node
           @job_inprogress.delete job
           @job_left << job
+          DachCUI.show_status
         end
       end
 
       Log.info "Starting job #{ job } on #{ node }..."
-      @pool.synchronize do
-        @job_inprogress << job
+      begin
+        @pool.synchronize do
+          @job_inprogress << job
+          DachCUI.show_status
+        end
+        shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
+      rescue
+        Log.error $!.to_s
+        @job_inprogress.delete job
       end
-      shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
     end
   end
 
