@@ -164,8 +164,14 @@ class Cluster
 
     @pool.synchronize do
       if ( not @node_left.empty? ) and ( not @job_left.empty? )
+        while ( job = @job_left.shift ) do 
+          if Jobs.assigned?( job )
+            Log.warn "Job #{ job } already assigned. skipping..."
+          else
+            break
+          end
+        end
         node = @node_left.shift
-        job = @job_left.shift
       end
     end
 
@@ -220,6 +226,8 @@ class Cluster
 
 
   def dispatch node, job
+    Jobs.assign job
+
     start = Time.now
     r = []
 

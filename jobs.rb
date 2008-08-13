@@ -1,7 +1,26 @@
 require 'job'
+require 'thread'
 
 
 class Jobs
+  @@job_mutex = Mutex.new
+  @@assigned = []
+
+
+  def self.assign job
+    @@job_mutex.synchronize do
+      @@assigned << job
+    end
+  end
+
+
+  def self.assigned? job
+    @@job_mutex.synchronize do
+      @@assigned.include? job
+    end
+  end
+
+
   def self.list fits_dir
     fits_files( fits_dir ).collect do | each |
       if /\Ar(\d+_\d+)_t0\.fits\Z/=~ File.basename( each )
