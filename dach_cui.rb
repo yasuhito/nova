@@ -83,6 +83,7 @@ class DachCUI < Dach
       @run[ each ].get_nodes
       puts "[#{ each }] *** Setup finished ***"
     end
+    puts '****** All setup finished ******'
 
     if @run[ 'hongo' ]
       sh "echo #{ @run[ 'hongo' ].trial_id } > #{ trial_id }"
@@ -117,7 +118,7 @@ class DachCUI < Dach
       puts "[#{ each.capitalize } Cluster]"
 
       # CPU status
-      inuse = Log.green( '#' ) * @run[ each ].node_inuse.size
+      inuse = Log.green( '#' ) * @run[ each ].job_inprogress.size
       node_left = '#' * @run[ each ].node_left.size
       puts sprintf( "%10s: %s", 'CPU', inuse + node_left )
 

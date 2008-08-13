@@ -9,7 +9,7 @@ if rand( 10 ) == 0
   exit 1
 end
 
-sleep rand( 600 )
+sleep rand( 30 )
 exit 0
 
 

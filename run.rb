@@ -21,7 +21,6 @@ class Run
   attr_reader :job_inprogress
   attr_reader :job_left
   attr_reader :node
-  attr_reader :node_inuse
   attr_reader :node_left
   attr_reader :novad
   attr_reader :trial_id
@@ -38,7 +37,6 @@ class Run
 
     @node = []
     @node_left = []
-    @node_inuse = []
 
     @pool = ThreadPool.new
 
@@ -219,8 +217,6 @@ class Run
       shell.on_success do
         @pool.synchronize do
           @node_left << node
-          @node_inuse.delete node
-
           @job_inprogress.delete job
           @job_done << job
         end
@@ -239,8 +235,6 @@ class Run
           Log.error "Job #{ job } on #{ node } failed"
 
           @node_left << node
-          @node_inuse.delete node
-
           @job_inprogress.delete job
           @job_left << job
         end
@@ -248,7 +242,6 @@ class Run
 
       Log.info "Starting job #{ job } on #{ node }..."
       @pool.synchronize do
-        @node_inuse << node
         @job_inprogress << job
       end
       shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
