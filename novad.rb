@@ -5,7 +5,6 @@
 $LOAD_PATH.unshift File.dirname( __FILE__ )
 
 
-require 'clusters'
 require 'dach_api'
 require 'dacha'
 require 'daemonize'
@@ -13,10 +12,12 @@ require 'job'
 require 'jobs'
 require 'shell'
 require 'socket'
-require 'tempfile'
 
 
 class Novad
+  PORT = 3225
+
+
   def initialize
     @dach_api = DachAPI.new
     @dacha = Dacha.new( cluster_name.to_sym )
@@ -73,7 +74,7 @@ class Novad
 
   def open_socket
     begin
-      @socket = TCPServer.open( 3225 ) 
+      @socket = TCPServer.open( PORT ) 
     rescue
       log $!.to_s
       $!.backtrace.each do | each |
@@ -178,11 +179,13 @@ class Novad
 end
 
 
-include Daemonize
-daemonize
-Novad.new.start
+if __FILE__ == $0
+  include Daemonize
+  daemonize
+  Novad.new.start
 
-sleep 10
+  sleep 10
+end
 
 
 ### Local variables:
