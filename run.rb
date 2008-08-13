@@ -41,46 +41,61 @@ class Run
     @node_inuse = []
 
     @pool = ThreadPool.new
+
+    c = Clusters.list( @cluster.to_sym )
+    @novad = [ c[ :list ].first, c[ :domain ] ].join( '.' )
   end
 
 
   def cleanup_results
-    msg "Cleaning up old *.result files for #{ @cluster } cluster..."
+    msg "[#{ @cluster }] Cleaning up old *.result files..."
     results.each do | each |
-      FileUtils.rm each, :verbose => true
+      FileUtils.rm each
     end
   end
 
 
-  def cleanup
-    msg "Cleaning up on #{ @cluster }..."
-    sh "ssh dach000@#{ @novad } ruby /home/dach000/nova/quit.rb"
+  def teardown
+    msg "[#{ @cluster }] Teardown..."
+    @pool.killall
+    gxpc_init
+    cleanup_processes
+    gxpc_quit
+    begin
+      sh "ssh dach000@#{ @novad } ruby /home/dach000/nova/quit.rb", :verbose => false
+    rescue
+      nil
+    end
   end
 
 
   def start_novad
-    c = Clusters.list( @cluster.to_sym )
-    novad_node = [ c[ :list ].first, c[ :domain ] ].join( '.' )
-
-    msg "Starting novad on #{ novad_node }"
-    sh "ssh dach000@#{ novad_node } ruby /home/dach000/nova/novad.rb"
-
-    msg "novad started on #{ novad_node }"
-    @novad = novad_node
+    msg "[#{ @cluster }] Starting novad..."
+    sh "ssh dach000@#{ @novad } ruby /home/dach000/nova/novad.rb", :verbose => false
   end
 
 
+  # [???] ほかに pkill すべきプロセスは？？
+  # [???] pkill する順番は関係ある？
   def cleanup_processes
-    msg "Cleaning up dach processes on #{ @cluster }..." 
-    gxpc_init
-    gxpc_killall
-    gxpc_dachmon
-    gxpc_quit
+    msg "[#{ @cluster }] Cleaning up dach processes..."
+    sh "ssh dach000@#{ @novad } ruby /home/dach000/nova/pkillnovad.rb", :verbose => false
+    sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 detect3", :verbose => false
+    sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 match2", :verbose => false
+    sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 mask3", :verbose => false
+    sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 sex", :verbose => false
+    sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 imsub3vp3", :verbose => false
+  end
+
+
+  def start_dachmon
+    msg "[#{ @cluster }] Starting dachmon..."
+    sh "ssh dach000@#{ @novad } gxpc e /home/dach000/nova/dachmon.rb", :verbose => false
   end
 
 
   def get_job
-    msg "Getting job list on #{ @cluster }..."
+    msg "[#{ @cluster }] Getting job list..."
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
         if /^ID (.*)/=~ line
@@ -94,9 +109,6 @@ class Run
         $stderr.puts line
       end
       
-      shell.on_success do
-        msg "#{ @cluster }: #{ @job.size } pairs."
-      end
       shell.on_failure do
         raise "get_job on #{ @cluster } failed"
       end
@@ -107,7 +119,7 @@ class Run
 
 
   def get_nodes
-    msg "Getting node list on #{ @cluster }..."
+    msg "[#{ @cluster }] Getting node list..."
     
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
@@ -118,9 +130,6 @@ class Run
         $stderr.puts line
       end
 
-      shell.on_success do
-        msg "#{ @cluster }: #{ @node.size } nodes."
-      end
       shell.on_failure do
         raise "get_nodes on #{ @cluster } failed"
       end
@@ -141,10 +150,7 @@ class Run
     @pool.synchronize do
       if ( not @node_left.empty? ) and ( not @job_left.empty? )
         node = @node_left.shift
-        @node_inuse << node
-
         job = @job_left.shift
-        @job_inprogress << job
       end
     end
 
@@ -168,6 +174,26 @@ class Run
   end
 
 
+  def gxpc_init
+    gxpc_quit
+    sh "ssh dach000@#{ @novad } gxpc use ssh #{ @cluster }", :verbose => false
+
+    Popen3::Shell.open do | shell |
+      shell.on_failure do
+        raise "[#{ @cluster }] gxpc explore failed!"
+      end
+      first = Clusters.list( @cluster.to_sym )[ :list ].first.tr( @cluster, '' )
+      last = Clusters.list( @cluster.to_sym )[ :list ].last.tr( @cluster, '' )
+      shell.exec "ssh dach000@#{ @novad } gxpc explore #{ @cluster }[[#{ first }-#{ last }]]"
+    end
+  end
+
+
+  def gxpc_quit
+    sh "ssh dach000@#{ @novad } gxpc quit", :verbose => false
+  end
+
+
   ################################################################################
   private
   ################################################################################
@@ -179,8 +205,6 @@ class Run
 
 
   def dispatch node, job
-    msg "Starting job #{ job } on #{ node }..."
-
     start = Time.now
     r = []
     Popen3::Shell.open do | shell |
@@ -202,7 +226,7 @@ class Run
         end
 
         time = ( Time.now - start ).to_i
-        msg "Job #{ job } on #{ node } finished successfully in #{ time }s."
+        Log.info "Job #{ job } on #{ node } finished successfully in #{ time }s."
         File.open( result_path( job, time ), 'w' ) do | f |
           r.each do | l |
             f.puts l
@@ -212,7 +236,7 @@ class Run
 
       shell.on_failure do
         @pool.synchronize do
-          $stderr.puts Log.pink( "job #{ job } on #{ node } failed" )
+          Log.error "Job #{ job } on #{ node } failed"
 
           @node_left << node
           @node_inuse.delete node
@@ -221,48 +245,14 @@ class Run
           @job_left << job
         end
       end
-      
+
+      Log.info "Starting job #{ job } on #{ node }..."
+      @pool.synchronize do
+        @node_inuse << node
+        @job_inprogress << job
+      end
       shell.exec "ssh dach000@#{ @novad } ruby /home/dach000/nova/dispatch.rb #{ node } #{ job }"
     end
-  end
-
-
-  def gxpc_init
-    sh "ssh dach000@#{ @novad } gxpc quit"
-    sh "ssh dach000@#{ @novad } gxpc use ssh #{ @cluster }"
-
-    Popen3::Shell.open do | shell |
-      shell.on_success do
-        msg "gxpc explore on #{ @cluster } succeeded."
-      end
-      shell.on_failure do
-        raise "gxpc explore on #{ @cluster } failed."
-      end
-      first = Clusters.list( @cluster.to_sym )[ :list ].first.tr( @cluster, '' )
-      last = Clusters.list( @cluster.to_sym )[ :list ].last.tr( @cluster, '' )
-      shell.exec "ssh dach000@#{ @novad } gxpc explore #{ @cluster }[[#{ first }-#{ last }]]"
-    end
-  end
-
-
-  # [???] ほかに pkill すべきプロセスは？？
-  # [???] pkill する順番は？
-  def gxpc_killall
-    sh "ssh dach000@#{ @novad } gxpc e pkill detect3"
-    sh "ssh dach000@#{ @novad } gxpc e pkill match2"
-    sh "ssh dach000@#{ @novad } gxpc e pkill mask3"
-    sh "ssh dach000@#{ @novad } gxpc e pkill sex"
-    sh "ssh dach000@#{ @novad } gxpc e pkill imsub3vp3"
-  end
-
-
-  def gxpc_dachmon
-    sh "ssh dach000@#{ @novad } gxpc e /home/dach000/nova/dachmon.rb"
-  end
-
-
-  def gxpc_quit
-    sh "ssh dach000@#{ @novad } gxpc quit"
   end
 
 

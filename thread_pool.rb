@@ -5,6 +5,7 @@ require 'thread'
 class ThreadPool
   def initialize
     @pool = []
+    @waiting = []
     @pool_mutex = Mutex.new
     @pool_cv = ConditionVariable.new
     @max_size = 30
@@ -18,7 +19,9 @@ class ThreadPool
         while @pool.size >= @max_size
           $stderr.puts "Pool is full; waiting to run #{ args.join( ',' ) }..." if $DEBUG
           # Sleep until some other thread calls @pool_cv.signal.
+          @waiting << Thread.current
           @pool_cv.wait @pool_mutex
+          @waiting.delete Thread.current
         end
       end
 
@@ -52,6 +55,13 @@ class ThreadPool
   def wait
     @pool_mutex.synchronize do
       @pool_cv.wait @pool_mutex
+    end
+  end
+
+
+  def killall
+    ( @pool + @waiting ).each do | each |
+      each.kill
     end
   end
 

@@ -1,3 +1,6 @@
+require 'thread'
+
+
 class Log
   PINK = "[0;31m"
   GREEN = "[0;32m"
@@ -6,6 +9,12 @@ class Log
   ORANGE = "[0;35m"
   BLUE = "[0;36m"
   RESET = "[0m"
+
+
+  @@log = File.open( '/tmp/dach000.log', 'w' )
+  @@log.sync = true
+
+  @@log_mutex = Mutex.new
 
 
   def self.pink str
@@ -25,6 +34,20 @@ class Log
 
   def self.green str
     GREEN + str + RESET
+  end
+
+
+  def self.info str
+    @@log_mutex.synchronize do
+      @@log.puts "#{ Time.now }: #{ str }"
+    end
+  end
+
+
+  def self.error str
+    @@log_mutex.synchronize do
+      @@log.puts "#{ Time.now }: #{ pink( str ) }"
+    end
   end
 end
 

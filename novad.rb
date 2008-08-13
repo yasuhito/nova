@@ -20,7 +20,7 @@ class Novad
   def initialize
     @dach_api = DachAPI.new
     @dacha = Dacha.new( cluster_name.to_sym )
-    @log = Tempfile.new( 'novad' )
+    @log = File.open( '/tmp/novad.log', 'w' )
   end
 
 
@@ -42,8 +42,7 @@ class Novad
           when /dispatch (.*) (.*)/
             dispatch s, $1, $2
           when /quit/
-            @log.close true
-            exit 0
+            quit
           else
             log "ERROR: unknown command #{ command }"
           end
@@ -62,6 +61,14 @@ class Novad
   ################################################################################
   private
   ################################################################################
+
+
+  def quit
+    @log.close
+    system 'pkill -9 -u dach000 -f dispatch.rb'
+    system 'pkill -9 -u dach000 -f dach.sh'
+    exit 0
+  end
 
 
   def open_socket
@@ -123,8 +130,8 @@ class Novad
     log "dispatch #{ host } #{ fits }"
 
     job = Job.new( fits, @dach_api.fits_dir )
-    cmd = "ssh #{ host } #{ job.to_cmd }"
-    # cmd = "ssh #{ host } ruby /home/dach000/nova/dummy_job.rb" # fails randomly!
+    # cmd = "ssh #{ host } #{ job.to_cmd }"
+    cmd = "ssh #{ host } ruby /home/dach000/nova/dummy_job.rb" # fails randomly!
 
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |

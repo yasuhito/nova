@@ -3,17 +3,21 @@ require 'thread_pool'
 
 class Dach
   def do_parallel list, &block
-    pool = ThreadPool.new
+    @pool = ThreadPool.new
     list.each do | each |
-      pool.dispatch each, &block
+      @pool.dispatch each, &block
     end
-    pool.shutdown
+    @pool.shutdown
   end
 
 
-  def cleanup
+  def teardown
+    @in_teardown = true
+    @pool.killall
+    system 'pkill -9 -u dach000 -f dispatch.rb'
+
     do_parallel( @clusters ) do | each |
-      @run[ each ].cleanup
+      @run[ each ].teardown
     end     
   end
 end

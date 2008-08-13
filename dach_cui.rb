@@ -5,6 +5,7 @@ require 'rubygems'
 
 require 'clusters'
 require 'dach'
+require 'log'
 require 'rake'
 require 'run'
 
@@ -23,21 +24,26 @@ class DachCUI < Dach
     @clusters.each do | each |
       @run[ each ] = Run.new( problem, each )
     end
+
+    @in_teardown = false
   end
 
 
   def start
     begin
       setup
+      sleep 10
       run
       check_ans
+    rescue Interrupt
+      $stderr.puts 'Interrupted!'
+      teardown
     rescue
-      $stderr.puts $!.to_str
+      Log.error $!.to_str
       $!.backtrace.each do | each |
-        $stderr.puts each
+        Log.error each
       end
-    ensure
-      cleanup
+      teardown
     end
     puts 'OK'
   end
@@ -68,11 +74,14 @@ class DachCUI < Dach
   def setup
     do_parallel( @clusters ) do | each |
       @run[ each ].cleanup_results
-      @run[ each ].start_novad
+      @run[ each ].gxpc_init
       @run[ each ].cleanup_processes
+      @run[ each ].start_dachmon
+      @run[ each ].gxpc_quit
+      @run[ each ].start_novad
       @run[ each ].get_job
       @run[ each ].get_nodes
-      puts "*** Setup finished on #{ each } ***"
+      puts "[#{ each }] *** Setup finished ***"
     end
 
     if @run[ 'hongo' ]
@@ -90,21 +99,36 @@ class DachCUI < Dach
     do_parallel( @clusters ) do | each |
       until @run[ each ].finished?
         @run[ each ].continue
-        show_status
+        @pool.synchronize do
+          show_status
+        end
       end
     end
   end
 
 
   def show_status
+    return if @in_teardown
+
+    system 'tput clear'
+    system 'tput cup 0 0'
+
     @clusters.each do | each |
+      puts "[#{ each.capitalize } Cluster]"
+
+      # CPU status
+      inuse = Log.green( '#' ) * @run[ each ].node_inuse.size
+      node_left = '#' * @run[ each ].node_left.size
+      puts sprintf( "%10s: %s", 'CPU', inuse + node_left )
+
+      # Job status
       done = Log.slate( '#' ) * @run[ each ].job_done.size
       inprogress = Log.green( '#' ) * @run[ each ].job_inprogress.size
-      left = '#' * @run[ each ].job_left.size
+      job_left = '#' * @run[ each ].job_left.size
+      puts sprintf( "%10s: %s", 'Job', done + inprogress + job_left )
 
-      puts sprintf( "%10s: %s", each, done + inprogress + left )
+      puts
     end
-    puts
   end
 end
 
