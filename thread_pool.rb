@@ -8,7 +8,7 @@ class ThreadPool
     @waiting = []
     @pool_mutex = Mutex.new
     @pool_cv = ConditionVariable.new
-    @max_size = 50
+    @max_size = 100
   end
 
 

@@ -22,14 +22,14 @@ class DachCUI
       cpu_all = Cluster[ each ].node.size
       cpu_inuse = Cluster[ each ].job_inprogress.size
       cpu_idle = ( Cluster[ each ].node.size - Cluster[ each ].job_inprogress.size )
-      puts sprintf( "              CPU #{ cpu_status( cpu_inuse, cpu_idle ) }: %s", Log.orange( '#' ) * ( cpu_inuse / SCALE ) + '#' * ( cpu_idle / SCALE ) )
+      puts sprintf( "              CPU #{ cpu_status( cpu_inuse, cpu_idle ) } %s", Log.orange( '#' ) * ( cpu_inuse / SCALE ) + '#' * ( cpu_idle / SCALE ) )
 
       # Job status
       job_all = Cluster[ each ].job.size
       job_done = Cluster[ each ].job_done.size
       job_inprogress = Cluster[ each ].job_inprogress.size
       job_left = job_all - job_done - job_inprogress
-      puts sprintf( "Job #{ job_status( job_done, job_inprogress, job_left ) }: %s", Log.slate( '#' ) * ( job_done / SCALE ) + Log.green( '#' ) * ( job_inprogress / SCALE ) + '#' * ( job_left / SCALE ) )
+      puts sprintf( "Job #{ job_status( job_done, job_inprogress, job_left ) } %s", Log.slate( '#' ) * ( job_done / SCALE ) + Log.green( '#' ) * ( job_inprogress / SCALE ) + '#' * ( job_left / SCALE ) )
 
       puts
     end
