@@ -7,6 +7,13 @@ class Jobs
   @@assigned = []
 
 
+  def self.unassign job
+    @@job_mutex.synchronize do
+      @@assigned.delete job
+    end
+  end
+
+
   def self.assign job
     @@job_mutex.synchronize do
       @@assigned << job

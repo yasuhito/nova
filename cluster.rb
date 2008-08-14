@@ -286,6 +286,7 @@ class Cluster
         @node_left << node
         @job_inprogress.delete job
         @job_left << job
+        Jobs.unassign job
         DachCUI.show_status
       end
     rescue
@@ -293,7 +294,9 @@ class Cluster
       $!.backtrace.each do | each |
         Log.error each
       end
+      Jobs.unassign job
       @job_inprogress.delete job
+      DachCUI.show_status
     end
   end
 
