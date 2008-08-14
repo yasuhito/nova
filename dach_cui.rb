@@ -4,7 +4,7 @@ require 'log'
 
 
 class DachCUI
-  SCALE = 5
+  SCALE = 4
 
 
   def self.show_status
