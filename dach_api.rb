@@ -17,6 +17,7 @@ class DachAPI
     end
 
     @trial_id = $1
+    # @fits_dir = File.join( '/tmp/dach000', $2 )
     @fits_dir = File.join( '/home/dach911', $2 )
   end
 

@@ -76,6 +76,7 @@ class App
       Cluster[ each ].start_novad
       Cluster[ each ].get_job
       Cluster[ each ].get_nodes
+      # Cluster[ each ].start_gfarm
       puts "[#{ each }] *** Setup finished ***"
     end
     puts '****** All setup finished ******'

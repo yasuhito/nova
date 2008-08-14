@@ -50,7 +50,8 @@ class Cluster
     @pool = ThreadPool.new
 
     c = Clusters.list( @cluster.to_sym )
-    @novad = [ c[ :list ].first, c[ :domain ] ].join( '.' )
+    @domain = c[ :domain ]
+    @novad = [ c[ :list ].first, @domain ].join( '.' )
     @novad_client = NovadClient.new( @novad )
 
     @@list[ cluster ] = self
@@ -95,6 +96,7 @@ class Cluster
   def cleanup_processes
     msg "[#{ @cluster }] Cleaning up dach processes..."
     sh "ssh dach000@#{ @novad } ruby /home/dach000/nova/pkillnovad.rb", :verbose => false
+    sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 gfarm2fs", :verbose => false
     sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 detect3", :verbose => false
     sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 match2", :verbose => false
     sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 mask3", :verbose => false
@@ -106,6 +108,28 @@ class Cluster
   def start_dachmon
     msg "[#{ @cluster }] Starting dachmon..."
     sh "ssh dach000@#{ @novad } gxpc e /home/dach000/nova/dachmon.rb", :verbose => false
+  end
+
+
+  def start_gfarm
+    msg "[#{ @cluster }] Starting gfarm..."
+    @node.uniq.each do | each |
+      Popen3::Shell.open do | shell |
+        shell.on_stdout do | line |
+          puts line
+        end
+        shell.on_stderr do | line |
+          $stderr.puts line
+        end
+        shell.on_failure do
+          raise "gf_mount on #{ each } failed"
+        end
+
+        cmd = "ssh #{ each }.#{ @domain } ruby /home/dach000/nova/gf_mount.rb"
+        $stderr.puts cmd
+        shell.exec cmd
+      end
+    end
   end
 
 
