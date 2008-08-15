@@ -111,28 +111,6 @@ class Cluster
   end
 
 
-  def start_gfarm
-    msg "[#{ @cluster }] Starting gfarm..."
-    @node.uniq.each do | each |
-      Popen3::Shell.open do | shell |
-        shell.on_stdout do | line |
-          puts line
-        end
-        shell.on_stderr do | line |
-          $stderr.puts line
-        end
-        shell.on_failure do
-          raise "gf_mount on #{ each } failed"
-        end
-
-        cmd = "ssh #{ each }.#{ @domain } ruby /home/dach000/nova/gf_mount.rb"
-        $stderr.puts cmd
-        shell.exec cmd
-      end
-    end
-  end
-
-
   def get_job
     msg "[#{ @cluster }] Getting job list..."
     Popen3::Shell.open do | shell |
