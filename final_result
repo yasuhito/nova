@@ -1,1 +1,5 @@
-FAIL TRIAL-final_dach-380643 5005.2684381 hongo000 Tue Aug 12 14:58:36 2008 f5a0e65e647061fda32e8f0247204c98
+/home/dach911/dach_api/dach_api --check_ans TRIAL-final_dach-122173 /home/dach000/nova/all.result
+SUCCESS TRIAL-final_dach-122173 4821.39503407 hongo000 Thu Aug 14 11:06:58 2008 6c7d2d8efe288aff22b0cc6b9ab6bfb1
+
+/home/dach911/dach_api/dach_api --check_ans TRIAL-final_dach-360450 /home/dach000/nova/all.result
+SUCCESS TRIAL-final_dach-360450 4783.33158493 hongo000 Thu Aug 14 12:27:35 2008 43e4959f32081937df6ad0d2d84e8dbd

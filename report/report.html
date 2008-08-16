@@ -1,0 +1,229 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Final Report (dach000)</title>
+  </head>
+
+  <h1>Final Report (dach000)</h1>
+  
+  Yasuhito TAKAMIYA (<a href="mailto:yasuhito@gmail.com">yasuhito@gmail.com</a>)<br>
+  2008/8/15
+  
+  <h2>Team Info</h2>
+  Team Name: Team 一人旅 (hitoritabi) (renamed from supadupanovausagi)<br>
+  Members: Yasuhito TAKAMIYA (NEC) and Yasuo ITABASHI (NEC)
+
+  <h2>Final Result (BT category)</h2>
+
+  <pre>
+> SUCCESS TRIAL-final_dach-360450 4783.33158493 hongo000 Thu Aug 14 12:27:35 2008 43e4959f32081937df6ad0d2d84e8dbd
+  </pre>
+
+  A concatenated output of superfind (dach.sh) is located at <i>hongo000:/home/dach000/nova/all.result</i>.
+
+  <hr>
+
+  <h2>Software components</h2>
+
+  <p>
+    In the following sections, we will explain our algorithms and
+    components organization by showing code snippets derived from
+    actual code. All programs are written in Ruby. Source codes are
+    available at
+    <a href="http://github.com/yasuhito/nova/tree/master">our GitHub
+    repository</a>.
+  </p>
+
+  <p>
+    The algorithm is quite straightforward -- each cluster executes
+    its locally allocated jobs in parallel. No cluster-cluster job
+    scheduling.
+  </p>
+
+  <h3>Master Process (start.rb)</h3>
+
+  <p>
+    The master process (start.rb), which controls entire execution,
+    runs at hongo000. Master process's lifecycle is as follows.
+  </p>
+
+  <p>
+    <ol>
+      <li>Started at hongo000.</li>
+      <li>Cleaning up old dach jobs and files.</li>
+      <li>Starts novad daemon (described bellow) on each clusters.</li>
+      <li>Gathers job list and node list from novads.</li>
+      <li>Enters main loop.</li>
+      <li>Do --check_ans.</li>
+    </ol>
+  </p>
+
+  <p>
+    In the main loop (step 5), master waits until all the clusters to
+    finish its own jobs. Here's Start#run method
+    from <a href="http://github.com/yasuhito/nova/tree/master/start.rb">start.rb</a>.
+  </p>
+
+<pre>
+def run
+  do_parallel( @clusters ) do | each |
+    until Cluster[ each ].finished?
+      Cluster[ each ].continue
+    end
+    Cluster[ each ].shutdown
+  end
+end
+</pre>
+
+  <p>
+    All the outputs from dach.sh are redirected and gatherd to the
+    master and stored at hongo000 (subdirectories of
+    hongo000:~dach000/nova/results/). Then concatenated with cat, and
+    checked with dach_api --check_ans.
+  <p>
+    
+    <h3>Novad</h3>
+    
+  <p>
+    On each cluster, a daemon called Novad
+    (<a href="http://github.com/yasuhito/nova/tree/master/novad.rb">novad.rb</a>)
+    is started at the first node (kyoto000, okubo000, etc.) of each
+    cluster, which continuously dispatches jobs to its local
+    nodes. Novad uses SSH for starting, acquiring exit code of, and
+    redirecting STDOUT, STDERR from remote jobs.
+  </p>
+
+  <p>
+    Again, the master does NO cluster-cluster job scheduling.  The
+    reason for this is explained at following evaluation section.
+  </p>
+
+
+  <h2>Optimizations</h2>
+  
+  <p>
+    By examining master's log carefully, we found that some jobs
+    (.fits files) are overlapped between clusters. In order to avoid
+    unnecessary jobs and duplicated results, we discarded jobs already
+    dispatched (Cluster#continue method
+    from <a href="http://github.com/yasuhito/nova/tree/master/cluster.rb">cluster.rb</a>)
+  </p>
+
+  <pre>
+if Jobs.assigned?( job )
+  Log.warn "Job #{ job } already assigned. skipping..."
+  @job_done << job
+end
+  </pre>
+
+  <p>
+    Other optimizations includes parallelizations over all of code
+    such as launching novad, job dispatching, etc. In order to easily
+    parallelize existing code, we prepared a set of parallelization
+    libraries. For example, Start#do_parallel executes code block
+    passed as its argument in
+    parallel. <a href="http://github.com/yasuhito/nova/tree/master/thread_pool.rb">ThreadPool
+    class</a> implements general thread pool functions.
+  </p>
+
+  <p>
+    We also tuned-up the size of ThreadPool close to the maximum, but
+    not to exhaust file descriptors.
+  </p>
+
+  <p>
+    We did no C/C++ level optimizations for superfind.
+  </p>
+
+
+  <h2>Evaluation</h2>
+ 
+  <p>
+    After the first successful run of 'final_dach' job, which took
+    4821 sec, we plotted each jobs' execution time using our
+    tiny <a href="http://github.com/yasuhito/nova/tree/master/graph.rb">graph.rb</a>
+    script.
+  </p>
+
+  <p>
+    Automatically generated image by graph.rb is something like this.
+  </p>
+
+  <p>
+    <img src="graph.png"><br>
+    (Note, this shows failed run because we shared hongo with other dach users by error)
+  </p>
+
+  <p>
+    By examining generated graph, the longest execution time over all
+    jobs was about 4600 sec at okubo, and which was very close to the
+    total execution time (= 4821 sec). This means that we need no job
+    scheduling between clusters.
+  </p>
+
+  <p>
+    <i>In fact</i>, we had a very buggy implementation of
+    cluster-cluster job scheduling using gfarm, but while our final
+    slot, we failed to mount gfarm and decided not to use this
+    implementation for the final run. The final result without
+    cluster-cluster job scheduling was 4783 sec.
+  </p>
+
+  <h2>Useful Tools</h2>
+
+  While contest we have written a set of tools for visualizing job
+  execution. These tools were very important for us to debug
+  multi-threaded code and performance tuning.
+
+  <h3>Dach CUI</h3>
+  <a href="http://github.com/yasuhito/nova/tree/master/dach_cui.rb">Dach
+    CUI</a> shows CPU and job states in real-time.<br>
+  <img width="80%" src="./cui.png"><br>
+
+  <h3>graph.rb</h3>
+  <a href="http://github.com/yasuhito/nova/tree/master/graph.rb">graph.rb</a>
+  plots job execution time, as described above.
+
+  <h3>Dummy Job</h3> 
+
+  <p>
+    This is not a visualization tool, but a kind of programming
+    technique to find underlying errors.
+  </p>
+  
+  <p>
+    For testing error handling of failed jobs, we have written a bunch
+    of dummy job script, which uses no CPU cycles but only sleeps for
+    a while then exits with random status code.
+  </p>
+
+  <pre>
+sleep rand( 30 )
+if rand( 10 ) == 0
+  exit 1 # FAIL
+else
+  exit 0
+end
+  </pre>
+
+  <p>
+    This script fails at the rate of 10 %. Because the rate is
+    completely controllable, this technique is useful for catching all
+    the possible exceptions and errors.
+  </p>
+
+  <h2>Next Step</h2>
+
+  <p>
+    We need to implement job scheduling like knapsack algorithm, with
+    guessing each jobs' execution time from its number of stars.
+  </p>
+
+  <h2>Conclusion</h2>
+
+  We hadn't enough time to implement and test. The Ruby language was
+  the best choice for rapid development of this kind of
+  job. Especially our tiny visualization scripts written in Ruby were
+  powerful enough for debugging and performance tuning.
+
+</html>

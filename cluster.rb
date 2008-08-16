@@ -50,7 +50,8 @@ class Cluster
     @pool = ThreadPool.new
 
     c = Clusters.list( @cluster.to_sym )
-    @novad = [ c[ :list ].first, c[ :domain ] ].join( '.' )
+    @domain = c[ :domain ]
+    @novad = [ c[ :list ].first, @domain ].join( '.' )
     @novad_client = NovadClient.new( @novad )
 
     @@list[ cluster ] = self
@@ -95,6 +96,7 @@ class Cluster
   def cleanup_processes
     msg "[#{ @cluster }] Cleaning up dach processes..."
     sh "ssh dach000@#{ @novad } ruby /home/dach000/nova/pkillnovad.rb", :verbose => false
+    sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 gfarm2fs", :verbose => false
     sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 detect3", :verbose => false
     sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 match2", :verbose => false
     sh "ssh dach000@#{ @novad } gxpc e pkill -9 -u dach000 mask3", :verbose => false
@@ -164,8 +166,16 @@ class Cluster
 
     @pool.synchronize do
       if ( not @node_left.empty? ) and ( not @job_left.empty? )
+        while ( job = @job_left.shift ) do 
+          if Jobs.assigned?( job )
+            Log.warn "Job #{ job } already assigned. skipping..."
+            @job_done << job
+            DachCUI.show_status
+          else
+            break
+          end
+        end
         node = @node_left.shift
-        job = @job_left.shift
       end
     end
 
@@ -220,6 +230,8 @@ class Cluster
 
 
   def dispatch node, job
+    Jobs.assign job
+
     start = Time.now
     r = []
 
@@ -252,6 +264,7 @@ class Cluster
         @node_left << node
         @job_inprogress.delete job
         @job_left << job
+        Jobs.unassign job
         DachCUI.show_status
       end
     rescue
@@ -259,7 +272,9 @@ class Cluster
       $!.backtrace.each do | each |
         Log.error each
       end
+      Jobs.unassign job
       @job_inprogress.delete job
+      DachCUI.show_status
     end
   end
 

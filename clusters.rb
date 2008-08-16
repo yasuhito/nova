@@ -1,6 +1,6 @@
 class Clusters
   def self.all
-    [ :kyushu, :hiro, :kyoto, :kobe, :suzuk, :imade, :chiba, :mirai, :hongo, :okubo, :pad ] # :keio
+    [ :kyushu, :hiro, :kyoto, :kobe, :suzuk, :imade, :chiba, :mirai, :hongo, :okubo ] # :pad, :keio
   end
 
 

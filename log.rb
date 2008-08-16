@@ -37,6 +37,18 @@ class Log
   end
 
 
+  def self.yellow str
+    YELLOW + str + RESET
+  end
+
+ 
+  def self.warn str
+    @@log_mutex.synchronize do
+      @@log.puts "#{ Time.now }: #{ yellow( str ) }"
+    end
+  end
+
+
   def self.info str
     @@log_mutex.synchronize do
       @@log.puts "#{ Time.now }: #{ str }"
